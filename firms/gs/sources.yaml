@@ -1,0 +1,74 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Goldman Sachs Investment Insights — source definitions
+#
+# Parallel sibling project to "JPM Insights" (each firm gets its own folder).
+# Three coverage areas: the corporate website (gs.com), Goldman Sachs Asset
+# Management (am.gs.com / GSAM), and podcasts.
+#
+# Ingestion methods (spec §1 priority): podcasts via native RSS; written insights
+# via public sitemaps + og: metadata (both gs.com and GSAM render lists client-
+# side but publish sitemaps with <lastmod> — no headless browser). robots.txt is
+# respected via per-source `params.exclude`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-sonnet-4-6
+  cluster_window_days: 3
+  web_max_new_per_run: 150   # max NEW article pages fetched per web source per run
+
+sources:
+  # ── Podcasts (native RSS) ─────────────────────────────────────────────────
+  - name: Goldman Sachs Exchanges
+    firm: Goldman Sachs
+    business_unit: Markets & Research
+    method: rss
+    content_type: podcast
+    url: https://www.goldmansachs.com/exchanges-podcast/feed.rss
+    tier: 1
+    notes: Flagship GS podcast — markets, economy, dealmaking. ~624 episodes.
+
+  # ── Corporate website written insights (官网) ─────────────────────────────
+  # gs.com/insights via sitemap-1.xml, filtered to the high-signal written +
+  # "The Markets" categories. Excludes robots-disallowed paths (top-of-mind,
+  # research, materials, ayco).
+  - name: GS Insights (web)
+    firm: Goldman Sachs
+    business_unit: Markets & Research
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.goldmansachs.com/insights
+    tier: 1
+    notes: gs.com/insights — articles, briefings, outlooks, The Markets (sitemap).
+    params:
+      sitemap_url: https://www.goldmansachs.com/sitemap-1.xml
+      include:
+        - /insights/articles/
+        - /insights/briefings/
+        - /insights/outlooks/
+        - /insights/the-markets/
+      exclude:
+        - /insights/top-of-mind/      # robots-disallowed
+        - /what-we-do/research/       # robots-disallowed
+        - /materials/                 # robots-disallowed
+        - /what-we-do/ayco/           # robots-disallowed
+
+  # ── Goldman Sachs Asset Management (GSAM) ─────────────────────────────────
+  - name: GSAM Insights (web)
+    firm: Goldman Sachs
+    business_unit: Asset Management
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://am.gs.com/en-us/advisors/insights
+    tier: 1
+    notes: GSAM US advisor insights via am.gs.com en-us sitemap.
+    params:
+      sitemap_url: https://am.gs.com/sitemap/en-us.xml
+      include:
+        - /advisors/insights/
+      exclude:
+        - /premium/                   # robots-disallowed
+        - /insights/topics/           # topic landing pages, not articles

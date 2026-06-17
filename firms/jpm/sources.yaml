@@ -1,0 +1,136 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# JPM Investment Insights Aggregator — source definitions
+#
+# Design-for-scale principle: adding a firm/source later should mean adding
+# entries here, not writing new code (unless a genuinely new ingestion method
+# is required). Phase 1 = JPMorgan podcast RSS feeds only.
+#
+# All seven feeds below were resolved + verified directly (HTTP 200, valid
+# podcast RSS) on the Podbean network. Pattern: https://feed.podbean.com/<slug>/feed.xml
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  # On each run, only NEW items published within this many days are sent to the
+  # LLM for enrichment. Older new items are still stored (so the back-catalogue
+  # is searchable) but skip the LLM until re-enriched — keeps the first-run cost
+  # bounded across ~1,200 historical episodes.
+  enrich_window_days: 60
+  # Hard cap on LLM-enriched items per feed per run (cost guard).
+  max_enrich_per_feed: 8
+  # Model for per-item summaries. Default Sonnet 4.6 (stronger summaries than
+  # Haiku; $3/$15 per 1M tokens vs $1/$5). Supports structured JSON output.
+  llm_model: claude-sonnet-4-6
+  # Fuzzy-title clustering window for collapsing the same outlook that appears
+  # on multiple feeds into one card.
+  cluster_window_days: 3
+  # Web-article adapter caps.
+  am_max_items: 400          # AM Solr: max insights docs pulled per run
+  cib_max_new_per_run: 200   # CIB: max NEW article pages fetched per run (per source)
+
+sources:
+  - name: Eye on the Market
+    firm: JPMorgan
+    business_unit: Asset Management
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/eyeonthemarket/feed.xml
+    tier: 1
+    notes: >-
+      Flagship strategist publication — Michael Cembalest (Chairman of Market &
+      Investment Strategy). Highest-signal item in the JPM AM menu. Audio version.
+
+  - name: Notes on the Week Ahead
+    firm: JPMorgan
+    business_unit: Asset Management
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/notesontheweekahead/feed.xml
+    tier: 1
+    notes: Dr. David Kelly, Chief Global Strategist. Weekly macro/market commentary.
+
+  - name: Insights Now
+    firm: JPMorgan
+    business_unit: Asset Management
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/insightsnow/feed.xml
+    tier: 1
+    notes: David Kelly & Gabriela Santos. Topical market views.
+
+  - name: On Investors' Minds
+    firm: JPMorgan
+    business_unit: Asset Management
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/on-investors-minds-apac/feed.xml
+    tier: 1
+    notes: APAC strategist views (Tai Hui et al.).
+
+  - name: At Any Rate
+    firm: JPMorgan
+    business_unit: Global Research
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/atanyrate/feed.xml
+    tier: 1
+    notes: J.P. Morgan Global Research — rates, FX, commodities, cross-asset.
+
+  - name: Global Data Pod
+    firm: JPMorgan
+    business_unit: Global Research
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/globaldatapod/feed.xml
+    tier: 1
+    notes: J.P. Morgan Global Research — global economics & data.
+
+  - name: Making Sense
+    firm: JPMorgan
+    business_unit: CIB
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/marketmatters/feed.xml
+    tier: 2
+    notes: >-
+      Commercial & Investment Bank channel (Investment Banking, Markets, Research).
+      Mixed signal — includes deal/IB content alongside market views.
+
+  # ── Written articles (web) — added after Phase 1 ──────────────────────────
+  # AM written insights via JPM's PUBLIC Solr index. Filtered to US/English,
+  # `contentAccess_s:unlocked` only (publicly accessible — never bypass gating,
+  # spec §10). One source entry fans out to Market/Portfolio/ETF/Retirement
+  # insights; source_name + tier are derived per-article from the path.
+  - name: JPM AM Insights (web)
+    firm: JPMorgan
+    business_unit: Asset Management
+    method: api
+    adapter: am_solr
+    content_type: article
+    url: https://am.jpmorgan.com/cs/search/am/select
+    tier: 1
+    notes: Public AEM/Solr index; only contentAccess_s=unlocked US/en insights pages.
+
+  # CIB / corporate-hub written articles. Full list pulled from the public
+  # sitemap (www.jpmorgan.com/US/en/sitemap.xml) filtered to each category — far
+  # more complete than the static "featured" set. Per-article title/summary from
+  # og: metadata; date from og:published_time → JSON-LD → sitemap <lastmod>.
+  # `url` is the human-readable category hub; the category is derived from it.
+  - name: Markets & Economy (web)
+    firm: JPMorgan
+    business_unit: Markets & Economy
+    method: scrape
+    adapter: jpm_corp_hub
+    content_type: article
+    url: https://www.jpmorgan.com/insights/markets-and-economy
+    tier: 1
+    notes: jpmorgan.com/insights, markets-and-economy category (full list via sitemap).
+
+  - name: Global Research (web)
+    firm: JPMorgan
+    business_unit: Global Research
+    method: scrape
+    adapter: jpm_corp_hub
+    content_type: article
+    url: https://www.jpmorgan.com/insights/global-research
+    tier: 1
+    notes: jpmorgan.com/insights, global-research category (full list via sitemap).

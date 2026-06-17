@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Morgan Stanley Investment Insights — source definitions
+#
+# Parallel sibling project to "JPM Insights" and "GS Insights".
+# Coverage: the corporate website (morganstanley.com/insights) and the
+# "Thoughts on the Market" podcast.
+#
+# NOTE — Morgan Stanley Investment Management (MSIM, the /im/ path) is NOT
+# included: morganstanley.com/im/* returns HTTP 403 to automated requests
+# (Akamai bot protection on that section). Per the project's "respect ToS / only
+# ingest publicly accessible content, do not bypass" rule, we do not attempt to
+# circumvent it. Revisit if MSIM exposes a public feed.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-sonnet-4-6
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  # ── Podcast (native RSS, Art19-hosted) ────────────────────────────────────
+  - name: Thoughts on the Market
+    firm: Morgan Stanley
+    business_unit: Research
+    method: rss
+    content_type: podcast
+    url: https://rss.art19.com/thoughts-on-the-market
+    tier: 1
+    notes: Daily MS Research markets podcast (strategist views). ~1,648 episodes.
+
+  # ── Corporate website written insights (官网) ─────────────────────────────
+  # morganstanley.com/insights via the main sitemap, filtered to written
+  # articles + themes. Excludes robots-disallowed paths and the podcast pages
+  # (those overlap with the Thoughts on the Market feed).
+  - name: MS Insights (web)
+    firm: Morgan Stanley
+    business_unit: Insights
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.morganstanley.com/insights
+    tier: 1
+    notes: morganstanley.com/insights — articles + themes (full list via sitemap).
+    params:
+      sitemap_url: https://www.morganstanley.com/sitemap.xml
+      include:
+        - /insights/articles/
+        - /insights/themes/
+      exclude:
+        - /content/          # robots-disallowed (AEM internals)
+        - /capital-markets   # robots-disallowed
+        - /im/               # robots-disallowed / 403 bot-blocked
+        - /auth/
+        - /pub/
+        - /etc/

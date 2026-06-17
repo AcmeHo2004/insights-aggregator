@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Insights Aggregator</title>
+  <meta name="description" content="JPMorgan · Goldman Sachs · Morgan Stanley investment insights, aggregated.">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+      <symbol id="i-podcast" viewBox="0 0 24 24"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></symbol>
+      <symbol id="i-article" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
+      <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+      <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand">Insights<span>Aggregator</span></div>
+      <span class="freshness" id="freshness"></span>
+
+      <div class="group-by" role="tablist" aria-label="Group by">
+        <span class="gb-label">Group</span>
+        <button class="seg" data-group="firm">Firm</button>
+        <button class="seg" data-group="business_unit">Business&nbsp;line</button>
+        <button class="seg" data-group="content_type">Type</button>
+        <button class="seg" data-group="none">Stream</button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <label class="search">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input id="q" type="search" placeholder="Search title &amp; summary…" autocomplete="off">
+      </label>
+      <button class="iconbtn" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">
+        <svg class="ic"><use href="#i-sun"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-row filters">
+      <div class="filt" id="f-firm"></div>
+      <div class="filt" id="f-type"></div>
+      <div class="dropdown" id="f-unit"></div>
+      <div class="dropdown" id="f-topic"></div>
+      <div class="chips dates" id="f-date">
+        <button class="chip" data-days="">All</button>
+        <button class="chip" data-days="1">Today</button>
+        <button class="chip" data-days="7">7d</button>
+        <button class="chip" data-days="30">30d</button>
+      </div>
+      <button class="chip toggle" id="t-unread">Unread</button>
+      <button class="chip toggle" id="t-star"><svg class="ic sm"><use href="#i-star"/></svg> Starred</button>
+      <button class="chip ghost hidden" id="reset-btn" title="Clear all filters">✕ Clear filters</button>
+      <div class="spacer"></div>
+      <select id="sort" class="select" title="Sort">
+        <option value="newest">Newest</option>
+        <option value="tier">Priority</option>
+      </select>
+      <div class="dropdown" id="presets"></div>
+      <button class="chip ghost" id="export-btn" title="Copy starred as a Markdown digest">
+        <svg class="ic sm"><use href="#i-copy"/></svg> Digest
+      </button>
+    </div>
+  </header>
+
+  <main id="grid" class="grid" aria-live="polite"></main>
+
+  <div id="toast" class="toast" role="status"></div>
+  <div id="help" class="help-hint">Keys: <b>j</b>/<b>k</b> move · <b>o</b> open · <b>r</b> read · <b>s</b> star · <b>/</b> search</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
