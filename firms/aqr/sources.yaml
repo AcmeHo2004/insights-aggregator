@@ -27,19 +27,19 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "AQR Research & Capital Market Assumptions (web)"
+  - name: "AQR Research & Insights (web)"
     firm: "AQR"
     business_unit: "Research"
     method: scrape
     adapter: sitemap_articles
     content_type: article
-    url: https://www.aqr.com/Insights
-    tier: 2
-    notes: "Best-effort. AQR written insights + outlooks via public sitemap; per-source failure isolated."
+    url: https://www.aqr.com/insights
+    tier: 1
+    notes: "AQR research papers, Alternative Thinking & Capital Market Assumptions via public sitemap (lowercase /insights/ — earlier 0 was a case mismatch)."
     params:
       sitemap_url: https://www.aqr.com/sitemap.xml
       include:
-        - /Insights/
+        - /insights/
       exclude:
         - /literature/
         - /forms/

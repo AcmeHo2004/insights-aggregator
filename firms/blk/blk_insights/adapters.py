@@ -17,6 +17,7 @@ does NOT attempt to bypass any gating — per-source failures are isolated and a
 
 from __future__ import annotations
 
+import datetime as dt
 import re
 import time
 from dataclasses import dataclass
@@ -64,8 +65,8 @@ def _meta(html: str) -> dict[str, str]:
 
 # Sitemap-index recursion caps (many firms publish a <sitemapindex>, not a flat
 # <urlset>; we follow child sitemaps one level deep, bounded for politeness).
-_MAX_CHILD_SITEMAPS = 20
-_MAX_SITEMAP_URLS = 20000
+_MAX_CHILD_SITEMAPS = 8
+_MAX_SITEMAP_URLS = 4000
 
 
 def _fetch_sitemap_text(client, url: str) -> str:
@@ -173,6 +174,14 @@ def _extract_date(html: str, meta: dict[str, str], lastmod: str | None) -> str |
     m = _JSONLD_DATE.search(html)
     if m and parse_iso(m.group(1)):
         return parse_iso(m.group(1))
+    # BlackRock exposes a real date as <meta name="publicationDate" content="Apr 22, 2026">
+    pub = meta.get("publicationdate")
+    if pub:
+        for fmt in ("%b %d, %Y", "%B %d, %Y"):
+            try:
+                return dt.datetime.strptime(pub.strip(), fmt).replace(tzinfo=dt.timezone.utc).isoformat()
+            except ValueError:
+                continue
     return parse_iso(lastmod)
 
 
@@ -188,7 +197,7 @@ def _fetch_article(client, url, canonical, item_id, source: Source, lastmod=None
     title = clean_text(meta.get("og:title") or "", 300)
     if not title:
         return None
-    title = re.split(r"\s+[|I]\s+BlackRock", title)[0].strip() or title
+    title = re.split(r"\s+[|I]\s+[Bb]lack[Rr]ock", title)[0].strip() or title
 
     return Item(
         id=item_id,

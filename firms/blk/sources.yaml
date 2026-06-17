@@ -1,13 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BlackRock — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
-# every firm-owned podcast (native RSS) + every distinct written-insight
-# section and market-outlook page (via the sitemap_articles adapter, one web
-# source per content domain, each listing all relevant include paths).
+# Coverage (to the JPM/GS standard): podcast + written insights + outlooks.
+#   • Podcast  — "The Bid" (BlackRock's flagship, Art19 RSS).
+#   • Insights + Outlook — BlackRock Investment Institute commentary, market
+#     insights and the quarterly Investment Outlook, via the public
+#     blackrock.com/us/individual sitemap (one source covers all three —
+#     the BII outlook + weekly commentary live under /insights/).
 #
-# Only publicly accessible content; adapters send a normal browser UA and do
-# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
+# Only publicly accessible content; browser UA, no auth/paywall bypass.
+# NOTE: blackrock.com (Akamai) serves full pages to residential IPs but may
+# throttle datacenter IPs — the web source reliably refreshes on local scans;
+# the podcast (Art19 CDN) always auto-updates. Seeded locally.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -15,7 +19,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 120   # BlackRock publishes ~95 current insights+outlooks; capture the full set
 
 sources:
   - name: "The Bid"
@@ -25,45 +29,27 @@ sources:
     content_type: podcast
     url: https://rss.art19.com/the-bid
     tier: 1
-    notes: "feed URL verified in public listings."
+    notes: "BlackRock's flagship podcast (markets, macro, alternatives). Art19 RSS — verified."
 
-  - name: "BlackRock Insights (web, US individual)"
+  - name: "BlackRock Insights & Outlook (web)"
     firm: "BlackRock"
     business_unit: "Investment Institute"
     method: scrape
     adapter: sitemap_articles
     content_type: article
     url: https://www.blackrock.com/us/individual/insights
-    tier: 2
-    notes: "Bot-gated site (not circumvented); best-effort. BlackRock written insights + outlooks via public sitemap; per-source failure isolated."
+    tier: 1
+    notes: "BII commentary + market insights + quarterly Investment Outlook (the BII outlook & weekly commentary live under /insights/). Public sitemap; videos & retirement-product pages excluded."
     params:
       sitemap_url: https://www.blackrock.com/us/individual/sitemap.xml
       include:
         - /us/individual/insights/
       exclude:
+        - /video/          # wellness-training / product explainer videos (noise)
+        - /retirement/     # retirement-product education (noise)
         - /literature/
         - /forms/
         - /legal/
         - /sign-in
         - /content/
         - /tools/
-
-  - name: "BlackRock Investment Institute (web, corporate)"
-    firm: "BlackRock"
-    business_unit: "Investment Institute"
-    method: scrape
-    adapter: sitemap_articles
-    content_type: article
-    url: https://www.blackrock.com/corporate/insights/blackrock-investment-institute
-    tier: 2
-    notes: "Bot-gated site (not circumvented); best-effort. Best-effort. BlackRock written insights + outlooks via public sitemap; per-source failure isolated."
-    params:
-      sitemap_url: https://www.blackrock.com/corporate/sitemap.xml
-      include:
-        - /corporate/insights/
-      exclude:
-        - /literature/
-        - /forms/
-        - /legal/
-        - /sign-in
-        - /content/

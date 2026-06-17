@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 120   # PIMCO publishes ~200 insights incl. the flagship Cyclical/Secular Outlooks
 
 sources:
   - name: "PIMCO Pod"
@@ -34,13 +34,14 @@ sources:
     adapter: sitemap_articles
     content_type: article
     url: https://www.pimco.com/us/en/insights
-    tier: 2
-    notes: "PIMCO written insights + outlooks via public sitemap; per-source failure isolated."
+    tier: 1
+    notes: "PIMCO Insights + the flagship Cyclical & Secular Outlooks (thematic slugs, e.g. 'reaching-for-resilience'). Public sitemap; real datePublished via JSON-LD. Podcast episode pages excluded (covered by the PIMCO Pod RSS)."
     params:
       sitemap_url: https://www.pimco.com/us/en/sitemap.xml
       include:
         - /us/en/insights/
       exclude:
+        - /us/en/insights/podcasts/   # dup of the PIMCO Pod RSS feed
         - /literature/
         - /forms/
         - /legal/

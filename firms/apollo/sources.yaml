@@ -1,13 +1,15 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Apollo — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
-# every firm-owned podcast (native RSS) + every distinct written-insight
-# section and market-outlook page (via the sitemap_articles adapter, one web
-# source per content domain, each listing all relevant include paths).
+# Coverage (JPM/GS standard): podcast + Torsten Slök's Daily Spark + insights +
+# outlook.
+#   • Podcast — "The View From Apollo".
+#   • Daily Spark (Torsten Slök, Apollo's flagship macro) + Apollo Academy notes
+#     via apolloacademy.com WordPress RSS feeds (native RSS → auto-updates in the
+#     cloud, no scraping needed).
+#   • Apollo corporate insights + outlooks via the apollo.com public sitemap.
 #
-# Only publicly accessible content; adapters send a normal browser UA and do
-# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
+# Only publicly accessible content; browser UA, no auth/paywall bypass.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -25,9 +27,18 @@ sources:
     content_type: podcast
     url: https://feeds.blubrry.com/feeds/TheViewFromApollo.xml
     tier: 1
-    notes: "feed URL verified in public listings."
+    notes: "Apollo's markets/credit podcast (Blubrry RSS) — verified."
 
-  - name: "Apollo Insights & Outlooks (web)"
+  - name: "Apollo Academy"
+    firm: "Apollo"
+    business_unit: "Insights"
+    method: rss
+    content_type: article
+    url: https://www.apolloacademy.com/feed/
+    tier: 1
+    notes: "Apollo Academy written insights (Torsten Slök's team — private credit / PE / real estate / macro). WordPress RSS (auto-updates). Note: this feed omits dates, so items sort by first-seen."
+
+  - name: "Apollo Insights & Outlook (web)"
     firm: "Apollo"
     business_unit: "Insights"
     method: scrape
@@ -35,38 +46,12 @@ sources:
     content_type: article
     url: https://www.apollo.com/insights-news/insights
     tier: 2
-    notes: "Apollo written insights + outlooks via public sitemap; per-source failure isolated."
+    notes: "Apollo corporate written insights + outlooks via public sitemap (depth/history beyond the RSS feeds)."
     params:
       sitemap_url: https://www.apollo.com/sitemap.xml
       include:
-        - /insights-news/
-        - /institutional/insights-news/
-        - /wealth/insights-news/
-        - /wealth/the-daily-spark
+        - /insights-news/insights/
         - /outlook
-      exclude:
-        - /literature/
-        - /forms/
-        - /legal/
-        - /sign-in
-        - /content/
-
-  - name: "Apollo Academy (web)"
-    firm: "Apollo"
-    business_unit: "Insights"
-    method: scrape
-    adapter: sitemap_articles
-    content_type: article
-    url: https://www.apolloacademy.com/
-    tier: 2
-    notes: "Best-effort. Apollo written insights + outlooks via public sitemap; per-source failure isolated."
-    params:
-      sitemap_url: https://www.apolloacademy.com/sitemap.xml
-      include:
-        - /daily-spark/
-        - /the-view-from-apollo/
-        - /2026-outlook/
-        - /daily-and-weekly-data
       exclude:
         - /literature/
         - /forms/

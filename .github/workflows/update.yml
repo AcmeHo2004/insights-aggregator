@@ -16,6 +16,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 45          # hard cap — a run can never hang for hours again
     steps:
       - uses: actions/checkout@v4
 
@@ -26,58 +27,26 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # Firms are auto-discovered from firms/*/ — adding or removing a firm
+      # needs NO edits here (package name is always <dir>_insights).
       - name: Restore previous databases (from the data branch)
         run: |
           git fetch origin data --depth=1 2>/dev/null || echo "no data branch yet (first run)"
           if git rev-parse --verify origin/data >/dev/null 2>&1; then
-            git checkout origin/data -- firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db firms/blk/data/insights.db firms/pimco/data/insights.db firms/apollo/data/insights.db firms/ubs/data/insights.db firms/bofa/data/insights.db firms/oaktree/data/insights.db firms/kkr/data/insights.db firms/wellsfargo/data/insights.db firms/blackstone/data/insights.db firms/franklintempleton/data/insights.db firms/rbc/data/insights.db firms/citi/data/insights.db firms/aqr/data/insights.db firms/nomura/data/insights.db firms/jefferies/data/insights.db firms/tdsecurities/data/insights.db firms/schroders/data/insights.db firms/abrdn/data/insights.db firms/janushenderson/data/insights.db firms/nuveen/data/insights.db firms/neubergerberman/data/insights.db firms/wellington/data/insights.db firms/brookfield/data/insights.db firms/ares/data/insights.db firms/carlyle/data/insights.db firms/gmo/data/insights.db firms/bnpparibas/data/insights.db firms/socgen/data/insights.db firms/troweprice/data/insights.db firms/capitalgroup/data/insights.db firms/invesco/data/insights.db firms/ssga/data/insights.db firms/vanguard/data/insights.db firms/doubleline/data/insights.db firms/barclays/data/insights.db firms/hsbc/data/insights.db firms/deutschebank/data/insights.db 2>/dev/null || echo "seed DBs missing"
+            for d in firms/*/; do
+              git checkout origin/data -- "${d}data/insights.db" 2>/dev/null || true
+            done
           fi
-          for f in jpm gs ms blk pimco apollo ubs bofa oaktree kkr wellsfargo blackstone franklintempleton rbc citi aqr nomura jefferies tdsecurities schroders abrdn janushenderson nuveen neubergerberman wellington brookfield ares carlyle gmo bnpparibas socgen troweprice capitalgroup invesco ssga vanguard doubleline barclays hsbc deutschebank; do ls -lh firms/$f/data/insights.db 2>/dev/null || echo "firms/$f: fresh (will rebuild)"; done
+          for d in firms/*/; do ls -lh "${d}data/insights.db" 2>/dev/null || echo "${d} fresh (will rebuild)"; done
 
-      - name: Scan firms (ingest new + enrich with Sonnet)
+      - name: Scan firms (ingest new + enrich with Haiku)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          ( cd firms/jpm && python -m jpm_insights scan ) || echo "jpm scan had errors (continuing)"
-          ( cd firms/gs && python -m gs_insights scan ) || echo "gs scan had errors (continuing)"
-          ( cd firms/ms && python -m ms_insights scan ) || echo "ms scan had errors (continuing)"
-          ( cd firms/blk && python -m blk_insights scan ) || echo "blk scan had errors (continuing)"
-          ( cd firms/pimco && python -m pimco_insights scan ) || echo "pimco scan had errors (continuing)"
-          ( cd firms/apollo && python -m apollo_insights scan ) || echo "apollo scan had errors (continuing)"
-          ( cd firms/ubs && python -m ubs_insights scan ) || echo "ubs scan had errors (continuing)"
-          ( cd firms/bofa && python -m bofa_insights scan ) || echo "bofa scan had errors (continuing)"
-          ( cd firms/oaktree && python -m oaktree_insights scan ) || echo "oaktree scan had errors (continuing)"
-          ( cd firms/kkr && python -m kkr_insights scan ) || echo "kkr scan had errors (continuing)"
-          ( cd firms/wellsfargo && python -m wellsfargo_insights scan ) || echo "wellsfargo scan had errors (continuing)"
-          ( cd firms/blackstone && python -m blackstone_insights scan ) || echo "blackstone scan had errors (continuing)"
-          ( cd firms/franklintempleton && python -m franklintempleton_insights scan ) || echo "franklintempleton scan had errors (continuing)"
-          ( cd firms/rbc && python -m rbc_insights scan ) || echo "rbc scan had errors (continuing)"
-          ( cd firms/citi && python -m citi_insights scan ) || echo "citi scan had errors (continuing)"
-          ( cd firms/aqr && python -m aqr_insights scan ) || echo "aqr scan had errors (continuing)"
-          ( cd firms/nomura && python -m nomura_insights scan ) || echo "nomura scan had errors (continuing)"
-          ( cd firms/jefferies && python -m jefferies_insights scan ) || echo "jefferies scan had errors (continuing)"
-          ( cd firms/tdsecurities && python -m tdsecurities_insights scan ) || echo "tdsecurities scan had errors (continuing)"
-          ( cd firms/schroders && python -m schroders_insights scan ) || echo "schroders scan had errors (continuing)"
-          ( cd firms/abrdn && python -m abrdn_insights scan ) || echo "abrdn scan had errors (continuing)"
-          ( cd firms/janushenderson && python -m janushenderson_insights scan ) || echo "janushenderson scan had errors (continuing)"
-          ( cd firms/nuveen && python -m nuveen_insights scan ) || echo "nuveen scan had errors (continuing)"
-          ( cd firms/neubergerberman && python -m neubergerberman_insights scan ) || echo "neubergerberman scan had errors (continuing)"
-          ( cd firms/wellington && python -m wellington_insights scan ) || echo "wellington scan had errors (continuing)"
-          ( cd firms/brookfield && python -m brookfield_insights scan ) || echo "brookfield scan had errors (continuing)"
-          ( cd firms/ares && python -m ares_insights scan ) || echo "ares scan had errors (continuing)"
-          ( cd firms/carlyle && python -m carlyle_insights scan ) || echo "carlyle scan had errors (continuing)"
-          ( cd firms/gmo && python -m gmo_insights scan ) || echo "gmo scan had errors (continuing)"
-          ( cd firms/bnpparibas && python -m bnpparibas_insights scan ) || echo "bnpparibas scan had errors (continuing)"
-          ( cd firms/socgen && python -m socgen_insights scan ) || echo "socgen scan had errors (continuing)"
-          ( cd firms/troweprice && python -m troweprice_insights scan ) || echo "troweprice scan had errors (continuing)"
-          ( cd firms/capitalgroup && python -m capitalgroup_insights scan ) || echo "capitalgroup scan had errors (continuing)"
-          ( cd firms/invesco && python -m invesco_insights scan ) || echo "invesco scan had errors (continuing)"
-          ( cd firms/ssga && python -m ssga_insights scan ) || echo "ssga scan had errors (continuing)"
-          ( cd firms/vanguard && python -m vanguard_insights scan ) || echo "vanguard scan had errors (continuing)"
-          ( cd firms/doubleline && python -m doubleline_insights scan ) || echo "doubleline scan had errors (continuing)"
-          ( cd firms/barclays && python -m barclays_insights scan ) || echo "barclays scan had errors (continuing)"
-          ( cd firms/hsbc && python -m hsbc_insights scan ) || echo "hsbc scan had errors (continuing)"
-          ( cd firms/deutschebank && python -m deutschebank_insights scan ) || echo "deutschebank scan had errors (continuing)"
+          for d in firms/*/; do
+            f=$(basename "$d")
+            ( cd "$d" && python -m "${f}_insights" scan ) || echo "$f scan had errors (continuing)"
+          done
 
       - name: Build static site
         run: python build_static.py
@@ -99,6 +68,6 @@ jobs:
           git config user.email "insights-bot@users.noreply.github.com"
           git checkout --orphan data-snapshot
           git rm -rf --cached . >/dev/null 2>&1 || true
-          git add -f firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db firms/blk/data/insights.db firms/pimco/data/insights.db firms/apollo/data/insights.db firms/ubs/data/insights.db firms/bofa/data/insights.db firms/oaktree/data/insights.db firms/kkr/data/insights.db firms/wellsfargo/data/insights.db firms/blackstone/data/insights.db firms/franklintempleton/data/insights.db firms/rbc/data/insights.db firms/citi/data/insights.db firms/aqr/data/insights.db firms/nomura/data/insights.db firms/jefferies/data/insights.db firms/tdsecurities/data/insights.db firms/schroders/data/insights.db firms/abrdn/data/insights.db firms/janushenderson/data/insights.db firms/nuveen/data/insights.db firms/neubergerberman/data/insights.db firms/wellington/data/insights.db firms/brookfield/data/insights.db firms/ares/data/insights.db firms/carlyle/data/insights.db firms/gmo/data/insights.db firms/bnpparibas/data/insights.db firms/socgen/data/insights.db firms/troweprice/data/insights.db firms/capitalgroup/data/insights.db firms/invesco/data/insights.db firms/ssga/data/insights.db firms/vanguard/data/insights.db firms/doubleline/data/insights.db firms/barclays/data/insights.db firms/hsbc/data/insights.db firms/deutschebank/data/insights.db
+          git add -f firms/*/data/insights.db
           git commit -m "data snapshot $(date -u +%FT%TZ)" >/dev/null
           git push -f origin data-snapshot:data

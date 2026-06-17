@@ -1,52 +1,42 @@
-# Next steps — live verification & fixes (handoff)
+# Deferred work — firms & sources to fix and re-add
 
-First real Action run (PR #1, run 27693891315) succeeded and ingested **~10k items
-across 31/40 firms**. This file lists what still needs fixing. Most fixes need a
-**live network session** (set the env Network access to **Full** and start a fresh
-session) so feeds/sitemaps can be verified in seconds.
+State after the 2026-06-17 cleanup: **31 firms live** (JPM, GS, MS + 28 added).
+Everything below was pruned because it returned **0 items / was blocked** on the
+first run. Each is easy to fix later in a **live network session** (verify the real
+feed/sitemap URL in seconds, edit that firm's `sources.yaml`, re-run its scan).
 
-Source of truth for all sources: `tools/recon2.json` (regenerate every
-`firms/<slug>/sources.yaml` with `python tools/finalize2.py`). Per-firm unresolved
-podcasts are also recorded as `# TODO` comments at the top of each `sources.yaml`.
+No `tools/` scripts anymore — sources are edited directly in `firms/<slug>/sources.yaml`.
 
-## Already done
-- **Sitemap-index recursion + gzip** added to the shared `sitemap_articles` adapter
-  (all 39 sitemap-using packages). Unit-tested offline. This alone should unlock
-  firms whose `/sitemap.xml` is a `<sitemapindex>` (Jefferies, Nuveen, T. Rowe …) —
-  re-run the Action to confirm before hand-fixing those.
+## A. Deferred firms (folder removed — re-add one-at-a-time with corrected sources)
+| Firm | Why removed | Re-add hint |
+|---|---|---|
+| UBS | podcast 403 (self-hosted feed bot-gated); 2 web 0 | find a non-gated feed surface (Apple/Megaphone); do NOT bypass 403 |
+| Wells Fargo | WFII web 0, CIB web 0; no podcast wired | find correct sitemap + the WF Investment Institute podcast feed |
+| TD Securities | web 0; podcast feed 404 | resolve correct sitemap + "Buyside Views" feed via iTunes lookup |
+| T. Rowe Price | web 0 (sitemap is a `<sitemapindex>` — recheck include paths) | fix include paths |
+| Invesco | web 403 | find non-gated surface; podcast "The Curious Investor" already lives under AQR |
+| Nuveen | web 0 | fix sitemap include paths |
+| Ares | web 403 | non-gated surface only |
+| Carlyle | web 403 | non-gated surface only |
+| Vanguard | sitemap 404 (`corporate.vanguard.com/sitemap.xml`) | find the real sitemap |
 
-## To fix (live session)
+## B. Disabled web sources inside LIVE firms (podcast carries the firm; web returned 0)
+Re-enable each `# --- DISABLED --- ` block in the firm's `sources.yaml` after
+fixing its `params.sitemap_url` / `include` paths:
+- **404 sitemap URL:** Oaktree, RBC, Citi (extra), Nomura, Société Générale (wholesale, trailing-slash bug).
+- **Sitemap fetched but 0 matches (fix include paths):** Franklin Templeton, SSGA,
+  DoubleLine, HSBC (×2), BNP Paribas, Janus Henderson, Neuberger Berman, Brookfield,
+  BofA, abrdn, BlackRock (corporate BII).
+- **403 web (do NOT bypass):** Brookfield web (podcast OK).
 
-### A. Wrong podcast feed URLs (returned 404 — find correct slug via iTunes lookup `itunes.apple.com/lookup?id=<id>` → feedUrl)
-- Schroders — "The Investor Download" (`feed.podbean.com/schroders/feed.xml` 404) and
-  "The Value Perspective" (`feed.podbean.com/schroderstvp/feed.xml` 404).
-- TD Securities — "Buyside Views" (`feed.podbean.com/xiabg-28b57a/feed.xml` 404).
-- Deutsche Bank — "PERSPECTIVES Weekly" (`feed.podbean.com/3g9r4-1af4bb/feed.xml` 404).
+## C. Removed dead podcast feeds (404)
+- Schroders — "The Investor Download" + "The Value Perspective" (both podbean 404).
+  Schroders web works; find the correct podcast slugs via
+  `itunes.apple.com/lookup?id=<id>` → `feedUrl` and re-add as `rss` if wanted.
 
-### B. Wrong web sitemap URL (404 — find the real sitemap, often /sitemap_index.xml or robots.txt-declared)
-- Oaktree (`oaktreecapital.com/sitemap.xml` 404) — podcast OK (77).
-- RBC (`rbccm.com/sitemap.xml` 404) — podcasts OK.
-- Citi (`citigroup.com/sitemap.xml` 404).
-- Nomura (`nomuraconnects.com/sitemap.xml` 404) — podcast OK (100).
-- Société Générale wholesale (`…/sitemap.xml/` 404, note trailing slash) — other SG source OK (209).
-- Vanguard (`corporate.vanguard.com/sitemap.xml` 404).
-
-### C. Bot-gated 403 — DO NOT bypass; leave best-effort + documented, or find a non-gated surface
-- UBS (all 3 sources 403, incl. the self-hosted podcast feed) → 0 items.
-- Brookfield, Ares, Carlyle, Invesco (web 403). Brookfield podcast OK (60).
-
-### D. Sitemap fetched but 0 article matches (re-check after the index-recursion change; else fix include paths)
-- Jefferies, Nuveen, T. Rowe Price, Schroders (web).
-
-### E. Transient
-- Neuberger Berman web `429` (still got 151 from podcast) — harmless; retry.
-
-## Also: resolve the 20 Apple-ID-only podcasts
-Search each `# TODO` block in `firms/*/sources.yaml` (Vanguard, Citi ×3, Jefferies,
-TD ×4, T. Rowe ×2, Invesco ×2, Barclays ×2, abrdn, Carlyle ×2, Janus Henderson,
-Deutsche Bank). Resolve `itunes.apple.com/lookup?id=<id>` → `feedUrl`, then add as
-`rss` sources and re-run `tools/finalize2.py`.
-
-## Loop
-After edits: `python build_static.py` locally, then re-trigger the Action
-(`update.yml` on this branch) and re-read the scan logs for per-source counts.
+## Fix loop
+1. (live session) verify the real URL with a quick fetch.
+2. edit `firms/<slug>/sources.yaml` (fix URL / include paths, or re-add a feed).
+3. `cd firms/<slug> && python -m <slug>_insights scan` — confirm >0 items.
+4. `python build_static.py`, eyeball, commit. The hourly Action auto-discovers
+   `firms/*/`, so no workflow edit is needed.

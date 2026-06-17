@@ -61,8 +61,8 @@ def _meta(html: str) -> dict[str, str]:
 
 # Sitemap-index recursion caps (many firms publish a <sitemapindex>, not a flat
 # <urlset>; we follow child sitemaps one level deep, bounded for politeness).
-_MAX_CHILD_SITEMAPS = 20
-_MAX_SITEMAP_URLS = 20000
+_MAX_CHILD_SITEMAPS = 8
+_MAX_SITEMAP_URLS = 4000
 
 
 def _fetch_sitemap_text(client, url: str) -> str:
