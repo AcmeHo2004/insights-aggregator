@@ -21,21 +21,13 @@ settings:
 # recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
 # (itunes.apple.com/lookup?id=<id> -> feedUrl) once network access allows, then
 # add as rss sources. Not fabricated here:
+#   - Buyside Views at TD Securities  (apple_id: 1650858192)
 #   - Viewpoint - A TD Securities Podcast  (apple_id: 1613987499)
 #   - TD Cowen Insights  (apple_id: 1520232019)
 #   - TDAM Talks  (apple_id: 1714020837)
 #   - TD Talks Podcast  (apple_id: 1806159175)
 
 sources:
-  - name: "Buyside Views at TD Securities"
-    firm: "TD Securities"
-    business_unit: "Research & Strategy"
-    method: rss
-    content_type: podcast
-    url: https://feed.podbean.com/xiabg-28b57a/feed.xml
-    tier: 1
-    notes: "feed URL inferred from the host's known slug pattern — confirm on first run."
-
   - name: "TD Securities Insights & Outlooks (web)"
     firm: "TD Securities"
     business_unit: "Research & Strategy"
@@ -43,7 +35,7 @@ sources:
     adapter: sitemap_articles
     content_type: article
     url: https://www.tdsecurities.com/ca/en/insights
-    tier: 2
+    tier: 1
     notes: "Best-effort. TD Securities written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.tdsecurities.com/sitemap.xml

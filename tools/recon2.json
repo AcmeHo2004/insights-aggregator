@@ -557,14 +557,12 @@
  "tdsecurities": {
   "display": "TD Securities",
   "bu": "Research & Strategy",
-  "podcasts": [
+  "podcasts": [],
+  "todo": [
    [
     "Buyside Views at TD Securities",
-    "https://feed.podbean.com/xiabg-28b57a/feed.xml",
-    "pattern"
-   ]
-  ],
-  "todo": [
+    "1650858192"
+   ],
    [
     "Viewpoint - A TD Securities Podcast",
     "1613987499"
@@ -614,12 +612,12 @@
   "podcasts": [
    [
     "The Investor Download",
-    "https://feed.podbean.com/schroders/feed.xml",
+    "https://schroders.podbean.com/feed.xml",
     "verified"
    ],
    [
     "The Value Perspective",
-    "https://feed.podbean.com/schroderstvp/feed.xml",
+    "https://schroderstvp.podbean.com/feed.xml",
     "verified"
    ]
   ],
@@ -1369,8 +1367,8 @@
    ],
    [
     "PERSPECTIVES Weekly",
-    "https://feed.podbean.com/3g9r4-1af4bb/feed.xml",
-    "pattern"
+    "https://feeds.captivate.fm/cio-weekly-investment-o/",
+    "verified"
    ]
   ],
   "todo": [

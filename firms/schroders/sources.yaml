@@ -23,7 +23,7 @@ sources:
     business_unit: "Insights"
     method: rss
     content_type: podcast
-    url: https://feed.podbean.com/schroders/feed.xml
+    url: https://schroders.podbean.com/feed.xml
     tier: 1
     notes: "feed URL verified in public listings."
 
@@ -32,7 +32,7 @@ sources:
     business_unit: "Insights"
     method: rss
     content_type: podcast
-    url: https://feed.podbean.com/schroderstvp/feed.xml
+    url: https://schroderstvp.podbean.com/feed.xml
     tier: 1
     notes: "feed URL verified in public listings."
 

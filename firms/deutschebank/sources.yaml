@@ -38,9 +38,9 @@ sources:
     business_unit: "Research"
     method: rss
     content_type: podcast
-    url: https://feed.podbean.com/3g9r4-1af4bb/feed.xml
+    url: https://feeds.captivate.fm/cio-weekly-investment-o/
     tier: 1
-    notes: "feed URL inferred from the host's known slug pattern — confirm on first run."
+    notes: "feed URL verified in public listings."
 
   - name: "Deutsche Bank Wealth CIO Insights (web)"
     firm: "Deutsche Bank"
