@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 150
+  web_max_new_per_run: 60
 
 sources:
   - name: "2050 Investors"

@@ -17,7 +17,7 @@ def conf_note(c):
             "unknown":"feed URL unresolved — placeholder, confirm before relying"}.get(c, c)
 
 SETTINGS = ("settings:\n  enrich_window_days: 60\n  max_enrich_per_feed: 8\n"
-            "  llm_model: claude-haiku-4-5\n  cluster_window_days: 3\n  web_max_new_per_run: 150\n")
+            "  llm_model: claude-haiku-4-5\n  cluster_window_days: 3\n  web_max_new_per_run: 60\n")
 
 def emit(slug, d):
     display, bu = d["display"], d.get("bu","Insights")

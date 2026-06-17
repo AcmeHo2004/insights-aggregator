@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 150
+  web_max_new_per_run: 60
 
 # Known firm-owned podcasts whose public RSS feed URL was NOT resolvable during
 # recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
