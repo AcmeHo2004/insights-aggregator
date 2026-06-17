@@ -1,28 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# BlackRock Investment Insights — source definitions
+# BlackRock — investment-insights source definitions
 #
-# Parallel sibling project to "JPM Insights", "GS Insights" and "MS Insights"
-# (each firm gets its own folder). Coverage: "The Bid" — BlackRock's flagship
-# investment podcast — and the corporate website's written insights, led by the
-# BlackRock Investment Institute (BII).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Ingestion methods (spec §1 priority): the podcast via native RSS (Art19-hosted,
-# same pattern as MS "Thoughts on the Market"); written insights via the public
-# per-region sitemap (www.blackrock.com/us/individual/sitemap.xml — a flat
-# <urlset> with <lastmod>) + og: metadata, through the generic `sitemap_articles`
-# adapter. No headless browser.
-#
-# NOTE — www.blackrock.com sits behind aggressive Akamai bot protection and
-# returned HTTP 403 to every verification fetch from the build/CI sandbox (the
-# same situation as Morgan Stanley's MSIM /im/ section). Per the project rule —
-# only ingest publicly accessible content, never bypass gating — we do NOT try to
-# circumvent it: the adapter sends a normal browser User-Agent and nothing more.
-# The "BII Insights (web)" source below is therefore best-effort: the sitemap and
-# article paths were resolved from public listings, but the source could not be
-# end-to-end verified from this sandbox. Per-source failures are isolated (spec
-# §10), so if Akamai blocks the run it simply yields no items and the podcast is
-# unaffected. The Bid (RSS) is the verified flagship. Revisit the web source once
-# its first live CI run confirms access.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -30,46 +15,55 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 150   # max NEW article pages fetched per web source per run
+  web_max_new_per_run: 150
 
 sources:
-  # ── Podcast (native RSS, Art19-hosted) ────────────────────────────────────
-  - name: The Bid
-    firm: BlackRock
-    business_unit: Markets & Insights
+  - name: "The Bid"
+    firm: "BlackRock"
+    business_unit: "Investment Institute"
     method: rss
     content_type: podcast
     url: https://rss.art19.com/the-bid
     tier: 1
-    notes: >-
-      BlackRock's flagship investment podcast (host Oscar Pulido). Markets,
-      mega forces, geopolitics, the macro outlook — features BlackRock Investment
-      Institute strategists and firm leaders. Weekly. Same Art19 host pattern as
-      MS "Thoughts on the Market".
+    notes: "feed URL verified in public listings."
 
-  # ── Corporate website written insights (BlackRock Investment Institute) ───
-  # blackrock.com/us/individual/insights via the US-individual sitemap, filtered
-  # to the BII thought-leadership + insights articles (weekly commentary, market
-  # outlooks, themes). The _filtered_urls hyphen rule drops section/landing roots.
-  - name: BII Insights (web)
-    firm: BlackRock
-    business_unit: BlackRock Investment Institute
+  - name: "BlackRock Insights (web, US individual)"
+    firm: "BlackRock"
+    business_unit: "Investment Institute"
     method: scrape
     adapter: sitemap_articles
     content_type: article
-    url: https://www.blackrock.com/us/individual/insights/blackrock-investment-institute
-    tier: 1
-    notes: >-
-      BlackRock Investment Institute + blackrock.com/us/individual/insights
-      articles via the public US-individual sitemap. Best-effort: Akamai bot-gated
-      (see header note); per-source failure is isolated.
+    url: https://www.blackrock.com/us/individual/insights
+    tier: 2
+    notes: "Bot-gated site (not circumvented); best-effort. BlackRock written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.blackrock.com/us/individual/sitemap.xml
       include:
         - /us/individual/insights/
       exclude:
-        - /literature/          # PDF literature / fund docs, not articles
-        - /forms/               # gated / interactive forms
-        - /tools/               # interactive tools, not written insights
-        - /sign-in              # auth
-        - /content/             # AEM internals
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/
+        - /tools/
+
+  - name: "BlackRock Investment Institute (web, corporate)"
+    firm: "BlackRock"
+    business_unit: "Investment Institute"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.blackrock.com/corporate/insights/blackrock-investment-institute
+    tier: 2
+    notes: "Bot-gated site (not circumvented); best-effort. Best-effort. BlackRock written insights + outlooks via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://www.blackrock.com/corporate/sitemap.xml
+      include:
+        - /corporate/insights/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/

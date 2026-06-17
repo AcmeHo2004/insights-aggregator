@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # GMO — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -18,7 +18,7 @@ settings:
   web_max_new_per_run: 150
 
 sources:
-  - name: "GMO Insights (web)"
+  - name: "GMO Research Library & 7-Year Forecast (web)"
     firm: "GMO"
     business_unit: "Research"
     method: scrape
@@ -26,7 +26,7 @@ sources:
     content_type: article
     url: https://www.gmo.com/americas/research-library/
     tier: 1
-    notes: "Best-effort. GMO insights via public sitemap; per-source failure isolated."
+    notes: "Best-effort. GMO written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.gmo.com/sitemap.xml
       include:

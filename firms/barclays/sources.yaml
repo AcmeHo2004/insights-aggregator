@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Barclays — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -17,20 +17,66 @@ settings:
   cluster_window_days: 3
   web_max_new_per_run: 150
 
+# Known firm-owned podcasts whose public RSS feed URL was NOT resolvable during
+# recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
+# (itunes.apple.com/lookup?id=<id> -> feedUrl) once network access allows, then
+# add as rss sources. Not fabricated here:
+#   - Word on the Street  (apple_id: 1464886078)
+#   - Barclays Private Bank Podcasts  (apple_id: 1534752624)
+
 sources:
-  - name: "Barclays Insights (web)"
+  - name: "Barclays Brief"
+    firm: "Barclays"
+    business_unit: "Investment Bank Research"
+    method: rss
+    content_type: podcast
+    url: https://feeds.captivate.fm/barclays-brief/
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "The Flip Side"
+    firm: "Barclays"
+    business_unit: "Investment Bank Research"
+    method: rss
+    content_type: podcast
+    url: https://feeds.captivate.fm/the-flip-side/
+    tier: 1
+    notes: "feed URL inferred from the host's known slug pattern — confirm on first run."
+
+  - name: "Barclays IB Insights & Outlook (web)"
     firm: "Barclays"
     business_unit: "Investment Bank Research"
     method: scrape
     adapter: sitemap_articles
     content_type: article
     url: https://www.ib.barclays/our-insights.html
-    tier: 1
-    notes: "Best-effort. Barclays insights via public sitemap; per-source failure isolated."
+    tier: 2
+    notes: "Best-effort. Barclays written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.ib.barclays/sitemap.xml
       include:
-        - /our-insights.html/
+        - /our-insights/
+        - /research/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/
+
+  - name: "Barclays Private Bank Insights (web)"
+    firm: "Barclays"
+    business_unit: "Private Bank"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://privatebank.barclays.com/insights/
+    tier: 2
+    notes: "Best-effort. Barclays written insights + outlooks via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://privatebank.barclays.com/sitemap.xml
+      include:
+        - /insights/
       exclude:
         - /literature/
         - /forms/

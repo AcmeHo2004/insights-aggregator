@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # RBC Capital Markets — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: the firm's flagship podcast(s) (native RSS) and written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -36,7 +36,16 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "RBC Capital Markets Insights (web)"
+  - name: "Strategic Alternatives"
+    firm: "RBC Capital Markets"
+    business_unit: "Research"
+    method: rss
+    content_type: podcast
+    url: https://feeds.captivate.fm/strategic-alternatives/
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "RBC CM Insights & Outlook (web)"
     firm: "RBC Capital Markets"
     business_unit: "Research"
     method: scrape
@@ -44,7 +53,7 @@ sources:
     content_type: article
     url: https://www.rbccm.com/en/insights
     tier: 2
-    notes: "Best-effort. RBC Capital Markets insights via public sitemap; per-source failure isolated."
+    notes: "Best-effort. RBC Capital Markets written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.rbccm.com/sitemap.xml
       include:

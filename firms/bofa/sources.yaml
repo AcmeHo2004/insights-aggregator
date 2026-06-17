@@ -1,15 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Bank of America — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: the firm's flagship podcast(s) (native RSS) and written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: Bank of America's site is known to use Akamai/Cloudflare bot protection — the
-#       web source is best-effort and may 403 at runtime; not circumvented.
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -29,7 +27,7 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "Bank of America Insights (web)"
+  - name: "BofA Global Research & Market Insights (web)"
     firm: "Bank of America"
     business_unit: "Global Research"
     method: scrape
@@ -37,11 +35,11 @@ sources:
     content_type: article
     url: https://business.bofa.com/en-us/content/market-strategies-insights.html
     tier: 2
-    notes: "Best-effort. Bank of America insights via public sitemap; per-source failure isolated."
+    notes: "Bot-gated site (not circumvented); best-effort. Best-effort. Bank of America written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://business.bofa.com/sitemap.xml
       include:
-        - /en-us/content/market-strategies-insights.html/
+        - /en-us/content/
       exclude:
         - /literature/
         - /forms/

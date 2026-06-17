@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # abrdn — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: the firm's flagship podcast(s) (native RSS) and written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -17,17 +17,14 @@ settings:
   cluster_window_days: 3
   web_max_new_per_run: 150
 
-sources:
-  - name: "abrdn Emerging Markets Equities"
-    firm: "abrdn"
-    business_unit: "Insights"
-    method: rss
-    content_type: podcast
-    url: https://feeds.buzzsprout.com/1632829.rss
-    tier: 1
-    notes: "feed URL verified in public listings."
+# Known firm-owned podcasts whose public RSS feed URL was NOT resolvable during
+# recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
+# (itunes.apple.com/lookup?id=<id> -> feedUrl) once network access allows, then
+# add as rss sources. Not fabricated here:
+#   - The Sustainable Investing Podcast  (apple_id: 1560985640)
 
-  - name: "abrdn Investment Trusts"
+sources:
+  - name: "Aberdeen Investment Trusts"
     firm: "abrdn"
     business_unit: "Insights"
     method: rss
@@ -36,19 +33,37 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "abrdn Insights (web)"
+  - name: "Aberdeen Emerging Market Equities"
+    firm: "abrdn"
+    business_unit: "Insights"
+    method: rss
+    content_type: podcast
+    url: https://feeds.buzzsprout.com/1632829.rss
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "Aberdeen Closed-End Funds"
+    firm: "abrdn"
+    business_unit: "Insights"
+    method: rss
+    content_type: podcast
+    url: https://feeds.buzzsprout.com/1592788.rss
+    tier: 1
+    notes: "feed URL inferred from the host's known slug pattern — confirm on first run."
+
+  - name: "Aberdeen Insights & Outlook (web)"
     firm: "abrdn"
     business_unit: "Insights"
     method: scrape
     adapter: sitemap_articles
     content_type: article
-    url: https://www.aberdeeninvestments.com/en-us/institutional/insights-and-research/insights
+    url: https://www.aberdeeninvestments.com/en-us/investor/insights-and-research
     tier: 2
-    notes: "Best-effort. abrdn insights via public sitemap; per-source failure isolated."
+    notes: "Best-effort. abrdn written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.aberdeeninvestments.com/sitemap.xml
       include:
-        - /en-us/institutional/insights/
+        - /insights-and-research
       exclude:
         - /literature/
         - /forms/

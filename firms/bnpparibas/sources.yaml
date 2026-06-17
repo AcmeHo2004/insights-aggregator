@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BNP Paribas — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -18,19 +18,40 @@ settings:
   web_max_new_per_run: 150
 
 sources:
-  - name: "BNP Paribas Insights (web)"
+  - name: "Talking Heads"
+    firm: "BNP Paribas"
+    business_unit: "Asset Management"
+    method: rss
+    content_type: podcast
+    url: https://feed.ausha.co/ykJO8CqWAZnW
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "Investment Insights"
+    firm: "BNP Paribas"
+    business_unit: "Asset Management"
+    method: rss
+    content_type: podcast
+    url: https://feed.ausha.co/BMAVlT5xZdZ3
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "BNPP AM Insights & Outlook (web)"
     firm: "BNP Paribas"
     business_unit: "Asset Management"
     method: scrape
     adapter: sitemap_articles
     content_type: article
     url: https://www.bnpparibas-am.com/en/how-we-think/insights/
-    tier: 1
-    notes: "Best-effort. BNP Paribas insights via public sitemap; per-source failure isolated."
+    tier: 2
+    notes: "Best-effort. BNP Paribas written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.bnpparibas-am.com/sitemap.xml
       include:
         - /en/how-we-think/insights/
+        - /en/portfolio-perspectives/
+        - /en/forward-thinking/
+        - /en/investment-outlook-2026/
       exclude:
         - /literature/
         - /forms/

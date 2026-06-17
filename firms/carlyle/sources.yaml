@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Carlyle — investment-insights source definitions
 #
-# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+# Sibling project to the other firms/ scanners. Coverage aims to be COMPLETE:
+# every firm-owned podcast (native RSS) + every distinct written-insight
+# section and market-outlook page (via the sitemap_articles adapter, one web
+# source per content domain, each listing all relevant include paths).
 #
-# Only publicly accessible content; the adapters send a normal browser UA and do
-# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
-# gated/403 source simply yields no items (revisit once a live CI run confirms).
-# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
-#       confirmable during recon); verify/adjust after the first CI run.
+# Only publicly accessible content; adapters send a normal browser UA and do
+# NOT bypass auth/paywalls/bot-gating. Per-source failures are isolated.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -17,8 +17,15 @@ settings:
   cluster_window_days: 3
   web_max_new_per_run: 150
 
+# Known firm-owned podcasts whose public RSS feed URL was NOT resolvable during
+# recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
+# (itunes.apple.com/lookup?id=<id> -> feedUrl) once network access allows, then
+# add as rss sources. Not fabricated here:
+#   - Insights & Indicators (host Jason Thomas)  (apple_id: 1607380340)
+#   - The Carlyle Podcast  (apple_id: 1490613744)
+
 sources:
-  - name: "Carlyle Insights (web)"
+  - name: "Carlyle Global Insights & Outlooks (web)"
     firm: "Carlyle"
     business_unit: "Global Insights"
     method: scrape
@@ -26,11 +33,14 @@ sources:
     content_type: article
     url: https://www.carlyle.com/global-insights
     tier: 1
-    notes: "Best-effort. Carlyle insights via public sitemap; per-source failure isolated."
+    notes: "Best-effort. Carlyle written insights + outlooks via public sitemap; per-source failure isolated."
     params:
       sitemap_url: https://www.carlyle.com/sitemap.xml
       include:
-        - /global-insights/
+        - /global-insights
+        - /insights-and-indicators
+        - /insights-from-the-pms-desk
+        - /the-carlyle-compass
       exclude:
         - /literature/
         - /forms/
