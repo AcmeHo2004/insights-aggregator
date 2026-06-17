@@ -62,13 +62,24 @@ def _meta(html: str) -> dict[str, str]:
     return out
 
 
-def _load_sitemap(client, sitemap_url: str) -> dict[str, str]:
-    """Parse a sitemap urlset into {url: lastmod}. Cached per process."""
-    if sitemap_url in _sitemap_cache:
-        return _sitemap_cache[sitemap_url]
-    resp = client.get(sitemap_url)
+# Sitemap-index recursion caps (many firms publish a <sitemapindex>, not a flat
+# <urlset>; we follow child sitemaps one level deep, bounded for politeness).
+_MAX_CHILD_SITEMAPS = 60
+_MAX_SITEMAP_URLS = 20000
+
+
+def _fetch_sitemap_text(client, url: str) -> str:
+    """GET a sitemap, transparently gunzipping .gz / gzip-magic bodies."""
+    resp = client.get(url)
     resp.raise_for_status()
-    xml = resp.text
+    content = resp.content
+    if url.lower().endswith(".gz") or content[:2] == b"\x1f\x8b":
+        import gzip
+        content = gzip.decompress(content)
+    return content.decode("utf-8", "replace")
+
+
+def _parse_urlset(xml: str) -> dict[str, str]:
     mapping: dict[str, str] = {}
     for block in re.findall(r"<url>.*?</url>", xml, re.S):
         loc = re.search(r"<loc>([^<]+)</loc>", block)
@@ -76,6 +87,35 @@ def _load_sitemap(client, sitemap_url: str) -> dict[str, str]:
             continue
         lm = re.search(r"<lastmod>([^<]+)</lastmod>", block)
         mapping[loc.group(1).strip()] = lm.group(1).strip() if lm else ""
+    return mapping
+
+
+def _load_sitemap(client, sitemap_url: str, _depth: int = 0) -> dict[str, str]:
+    """Parse a sitemap into {url: lastmod}. Handles both a flat <urlset> and a
+    <sitemapindex> (recursing one level into child sitemaps). Cached per process."""
+    if sitemap_url in _sitemap_cache:
+        return _sitemap_cache[sitemap_url]
+    try:
+        xml = _fetch_sitemap_text(client, sitemap_url)
+    except Exception:  # noqa: BLE001 — a bad child/sitemap yields nothing, not a crash
+        _sitemap_cache[sitemap_url] = {}
+        return {}
+
+    if "<sitemapindex" in xml[:3000].lower() and _depth < 1:
+        mapping: dict[str, str] = {}
+        fetched = 0
+        for block in re.findall(r"<sitemap>.*?</sitemap>", xml, re.S):
+            loc = re.search(r"<loc>([^<]+)</loc>", block)
+            if not loc:
+                continue
+            mapping.update(_load_sitemap(client, loc.group(1).strip(), _depth + 1))
+            fetched += 1
+            if fetched >= _MAX_CHILD_SITEMAPS or len(mapping) >= _MAX_SITEMAP_URLS:
+                break
+        _sitemap_cache[sitemap_url] = mapping
+        return mapping
+
+    mapping = _parse_urlset(xml)
     _sitemap_cache[sitemap_url] = mapping
     return mapping
 

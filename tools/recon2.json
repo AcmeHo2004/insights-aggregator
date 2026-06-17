@@ -1,0 +1,1402 @@
+{
+ "blk": {
+  "display": "BlackRock",
+  "bu": "Investment Institute",
+  "skip": false,
+  "podcasts": [
+   [
+    "The Bid",
+    "https://rss.art19.com/the-bid",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "BlackRock Insights (web, US individual)",
+    "url": "https://www.blackrock.com/us/individual/insights",
+    "sitemap_url": "https://www.blackrock.com/us/individual/sitemap.xml",
+    "include": [
+     "/us/individual/insights/"
+    ],
+    "gated": true,
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/",
+     "/tools/"
+    ]
+   },
+   {
+    "name": "BlackRock Investment Institute (web, corporate)",
+    "url": "https://www.blackrock.com/corporate/insights/blackrock-investment-institute",
+    "sitemap_url": "https://www.blackrock.com/corporate/sitemap.xml",
+    "include": [
+     "/corporate/insights/"
+    ],
+    "gated": true,
+    "best_effort": true,
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "pimco": {
+  "display": "PIMCO",
+  "bu": "Asset Management",
+  "podcasts": [
+   [
+    "PIMCO Pod",
+    "https://feeds.megaphone.fm/pimcopod",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "PIMCO Insights & Outlooks (web)",
+    "url": "https://www.pimco.com/us/en/insights",
+    "sitemap_url": "https://www.pimco.com/us/en/sitemap.xml",
+    "include": [
+     "/us/en/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "apollo": {
+  "display": "Apollo",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "The View From Apollo",
+    "https://feeds.blubrry.com/feeds/TheViewFromApollo.xml",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Apollo Insights & Outlooks (web)",
+    "url": "https://www.apollo.com/insights-news/insights",
+    "sitemap_url": "https://www.apollo.com/sitemap.xml",
+    "include": [
+     "/insights-news/",
+     "/institutional/insights-news/",
+     "/wealth/insights-news/",
+     "/wealth/the-daily-spark",
+     "/outlook"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   },
+   {
+    "name": "Apollo Academy (web)",
+    "url": "https://www.apolloacademy.com/",
+    "sitemap_url": "https://www.apolloacademy.com/sitemap.xml",
+    "best_effort": true,
+    "include": [
+     "/daily-spark/",
+     "/the-view-from-apollo/",
+     "/2026-outlook/",
+     "/daily-and-weekly-data"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "ubs": {
+  "display": "UBS",
+  "bu": "Chief Investment Office",
+  "podcasts": [
+   [
+    "UBS On-Air: Market Moves",
+    "https://www.ubs.com/us/en/wealth-management/insights/podcasts/_jcr_content/mainpar/toplevelgrid_1112494256/col1/tabteaser/tabteasersplit/innergrid/xcol1/responsivepodcast_co.rss20.xml",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "UBS CIO Insights (web, global)",
+    "url": "https://www.ubs.com/global/en/wealthmanagement/insights.html",
+    "sitemap_url": "https://www.ubs.com/global/en/sitemap.xml",
+    "best_effort": true,
+    "include": [
+     "/global/en/wealthmanagement/insights/",
+     "/global/en/wealthmanagement/chief-investment-office"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   },
+   {
+    "name": "UBS Insights (web, US)",
+    "url": "https://www.ubs.com/us/en/wealth-management/insights.html",
+    "sitemap_url": "https://www.ubs.com/us/en/sitemap.xml",
+    "best_effort": true,
+    "include": [
+     "/us/en/wealth-management/insights/",
+     "/us/en/wealth-management/year-ahead"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "bofa": {
+  "display": "Bank of America",
+  "bu": "Global Research",
+  "podcasts": [
+   [
+    "Global Research Unlocked",
+    "https://feed.podbean.com/bofaglobalresearch/feed.xml",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "BofA Global Research & Market Insights (web)",
+    "url": "https://business.bofa.com/en-us/content/market-strategies-insights.html",
+    "sitemap_url": "https://business.bofa.com/sitemap.xml",
+    "gated": true,
+    "best_effort": true,
+    "include": [
+     "/en-us/content/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "oaktree": {
+  "display": "Oaktree",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "The Memo by Howard Marks",
+    "https://rss.art19.com/the-memo-by-howard-marks",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Oaktree Insights & Memos (web)",
+    "url": "https://www.oaktreecapital.com/insights",
+    "sitemap_url": "https://www.oaktreecapital.com/sitemap.xml",
+    "best_effort": true,
+    "include": [
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "kkr": {
+  "display": "KKR",
+  "bu": "Insights",
+  "podcasts": [],
+  "web": [
+   {
+    "name": "KKR Insights & Macro (web)",
+    "url": "https://www.kkr.com/insights",
+    "sitemap_url": "https://www.kkr.com/global/en/sitemap.xml",
+    "include": [
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ]
+   }
+  ]
+ },
+ "wellsfargo": {
+  "display": "Wells Fargo",
+  "bu": "Investment Institute",
+  "podcasts": [],
+  "web": [
+   {
+    "name": "WFII Research & Commentary (web)",
+    "url": "https://www.wellsfargoadvisors.com/research-analysis.htm",
+    "sitemap_url": "https://www.wellsfargoadvisors.com/sitemap.xml",
+    "include": [
+     "/research-analysis"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "Wells Fargo CIB Insights (web)",
+    "url": "https://www.wellsfargo.com/cib/insights/",
+    "sitemap_url": "https://www.wellsfargo.com/sitemap.xml",
+    "include": [
+     "/cib/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "CIB"
+   }
+  ]
+ },
+ "blackstone": {
+  "display": "Blackstone",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "Blackstone Podcast",
+    "https://feed.podbean.com/blackstone/feed.xml",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Blackstone Insights & Market Views (web)",
+    "url": "https://www.blackstone.com/insights/",
+    "sitemap_url": "https://www.blackstone.com/sitemap.xml",
+    "include": [
+     "/insights/",
+     "/insight-category/",
+     "/pws/insights/",
+     "/the-connection/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "franklintempleton": {
+  "display": "Franklin Templeton",
+  "bu": "Asset Management",
+  "podcasts": [
+   [
+    "Talking Markets",
+    "https://franklintempletontalkingmarkets.libsyn.com/rss",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Franklin Templeton Articles & Podcasts (web)",
+    "url": "https://www.franklintempleton.com/articles",
+    "sitemap_url": "https://www.franklintempleton.com/sitemap.xml",
+    "include": [
+     "/articles/",
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "FT Institute Outlooks (web)",
+    "url": "https://www.ftinstitutional.com/insights/",
+    "sitemap_url": "https://www.ftinstitutional.com/sitemap.xml",
+    "include": [
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "FT Institute"
+   }
+  ]
+ },
+ "rbc": {
+  "display": "RBC Capital Markets",
+  "bu": "Research",
+  "podcasts": [
+   [
+    "Macro Minutes",
+    "https://feeds.captivate.fm/rbc-macro-minutes/",
+    "verified"
+   ],
+   [
+    "RBC's Markets in Motion",
+    "https://feeds.captivate.fm/rbcs-markets-in-motion/",
+    "verified"
+   ],
+   [
+    "Strategic Alternatives",
+    "https://feeds.captivate.fm/strategic-alternatives/",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "RBC CM Insights & Outlook (web)",
+    "url": "https://www.rbccm.com/en/insights",
+    "sitemap_url": "https://www.rbccm.com/sitemap.xml",
+    "include": [
+     "/en/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "citi": {
+  "display": "Citi",
+  "bu": "Citi Research",
+  "podcasts": [],
+  "todo": [
+   [
+    "Research @ Citi",
+    "1745776963"
+   ],
+   [
+    "The Short and Long (Citi Wealth)",
+    "1894017723"
+   ],
+   [
+    "The Citi Institute Podcast",
+    "1805646802"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Citi Insights / Institute / GPS (web)",
+    "url": "https://www.citigroup.com/global/insights",
+    "sitemap_url": "https://www.citigroup.com/sitemap.xml",
+    "include": [
+     "/global/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "Citi Wealth Market Insights (web)",
+    "url": "https://marketinsights.citi.com/",
+    "sitemap_url": "https://marketinsights.citi.com/sitemap.xml",
+    "include": [
+     "/Market-Commentary/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Citi Wealth"
+   }
+  ]
+ },
+ "aqr": {
+  "display": "AQR",
+  "bu": "Research",
+  "podcasts": [
+   [
+    "The Curious Investor",
+    "https://feeds.megaphone.fm/thecuriousinvestor",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "AQR Research & Capital Market Assumptions (web)",
+    "url": "https://www.aqr.com/Insights",
+    "sitemap_url": "https://www.aqr.com/sitemap.xml",
+    "include": [
+     "/Insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "nomura": {
+  "display": "Nomura",
+  "bu": "Global Research",
+  "podcasts": [
+   [
+    "Nomura — The Week Ahead",
+    "https://nomurapodcasts.libsyn.com/rss",
+    "pattern"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Nomura Connects Focused Thinking (web)",
+    "url": "https://www.nomuraconnects.com/focused-thinking-posts/",
+    "sitemap_url": "https://www.nomuraconnects.com/sitemap.xml",
+    "include": [
+     "/focused-thinking-posts/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "jefferies": {
+  "display": "Jefferies",
+  "bu": "Insights",
+  "podcasts": [],
+  "todo": [
+   [
+    "Jefferies EMEA Market Minutes",
+    "1509334191"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Jefferies Insights & Quarterly (web)",
+    "url": "https://insights.jefferies.com/",
+    "sitemap_url": "https://insights.jefferies.com/sitemap.xml",
+    "include": [
+     "/archive/",
+     "/category/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "tdsecurities": {
+  "display": "TD Securities",
+  "bu": "Research & Strategy",
+  "podcasts": [
+   [
+    "Buyside Views at TD Securities",
+    "https://feed.podbean.com/xiabg-28b57a/feed.xml",
+    "pattern"
+   ]
+  ],
+  "todo": [
+   [
+    "Viewpoint - A TD Securities Podcast",
+    "1613987499"
+   ],
+   [
+    "TD Cowen Insights",
+    "1520232019"
+   ],
+   [
+    "TDAM Talks",
+    "1714020837"
+   ],
+   [
+    "TD Talks Podcast",
+    "1806159175"
+   ]
+  ],
+  "web": [
+   {
+    "name": "TD Securities Insights & Outlooks (web)",
+    "url": "https://www.tdsecurities.com/ca/en/insights",
+    "sitemap_url": "https://www.tdsecurities.com/sitemap.xml",
+    "include": [
+     "/ca/en/insights",
+     "/ca/en/research-strategy",
+     "/ca/en/economic-forecasting",
+     "/ca/en/viewpoint",
+     "/ca/en/td-cowen-insights",
+     "/ca/en/buyside-views",
+     "/ca/en/global-strategy-outlook",
+     "/ca/en/global-best-ideas"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "schroders": {
+  "display": "Schroders",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "The Investor Download",
+    "https://feed.podbean.com/schroders/feed.xml",
+    "verified"
+   ],
+   [
+    "The Value Perspective",
+    "https://feed.podbean.com/schroderstvp/feed.xml",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Schroders Insights & Outlook (web)",
+    "url": "https://www.schroders.com/en-us/us/individual/insights/",
+    "sitemap_url": "https://www.schroders.com/sitemap.xml",
+    "include": [
+     "/insights/",
+     "/outlook/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "abrdn": {
+  "display": "abrdn",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "Aberdeen Investment Trusts",
+    "https://feeds.buzzsprout.com/1860650.rss",
+    "verified"
+   ],
+   [
+    "Aberdeen Emerging Market Equities",
+    "https://feeds.buzzsprout.com/1632829.rss",
+    "verified"
+   ],
+   [
+    "Aberdeen Closed-End Funds",
+    "https://feeds.buzzsprout.com/1592788.rss",
+    "pattern"
+   ]
+  ],
+  "todo": [
+   [
+    "The Sustainable Investing Podcast",
+    "1560985640"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Aberdeen Insights & Outlook (web)",
+    "url": "https://www.aberdeeninvestments.com/en-us/investor/insights-and-research",
+    "sitemap_url": "https://www.aberdeeninvestments.com/sitemap.xml",
+    "include": [
+     "/insights-and-research"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "janushenderson": {
+  "display": "Janus Henderson",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "Global Perspectives",
+    "https://feeds.captivate.fm/janus-henderson-global-perspectives/",
+    "verified"
+   ]
+  ],
+  "todo": [
+   [
+    "Connections - investment views from Janus Henderson (UK)",
+    "1518304272"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Janus Henderson Insights & Market GPS (web)",
+    "url": "https://www.janushenderson.com/en-us/advisor/insights/",
+    "sitemap_url": "https://www.janushenderson.com/sitemap.xml",
+    "include": [
+     "/en-us/advisor/insights/",
+     "/en-us/investor/insights/",
+     "/en-us/institutional/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "nuveen": {
+  "display": "Nuveen",
+  "bu": "Insights",
+  "podcasts": [],
+  "web": [
+   {
+    "name": "Nuveen Insights & Investment Outlook (web)",
+    "url": "https://www.nuveen.com/en-us/insights",
+    "sitemap_url": "https://www.nuveen.com/sitemap.xml",
+    "include": [
+     "/en-us/insights",
+     "/global/insights"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "neubergerberman": {
+  "display": "Neuberger Berman",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "Disruptive Forces in Investing",
+    "https://disruptive.libsyn.com/rss",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Neuberger Berman Insights & Outlooks (web)",
+    "url": "https://www.nb.com/en/global/insights",
+    "sitemap_url": "https://www.nb.com/sitemap.xml",
+    "include": [
+     "/en/global/insights",
+     "/en/global/equity-market-outlook",
+     "/en/global/fiio",
+     "/en/global/aac",
+     "/en/global/solving"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "wellington": {
+  "display": "Wellington",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "WellSaid",
+    "https://feeds.simplecast.com/KJp7t7J4",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Wellington Insights & Outlooks (web)",
+    "url": "https://www.wellington.com/en/insights",
+    "sitemap_url": "https://www.wellington.com/sitemap.xml",
+    "include": [
+     "/en/insights",
+     "/en-us/institutional/insights"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "brookfield": {
+  "display": "Brookfield",
+  "bu": "News & Insights",
+  "podcasts": [
+   [
+    "Brookfield Perspectives",
+    "https://rss.art19.com/brookfield-podcast",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Brookfield Insights & 2026 Outlooks (web)",
+    "url": "https://www.brookfield.com/news-insights/insights",
+    "sitemap_url": "https://www.brookfield.com/sitemap.xml",
+    "include": [
+     "/views-news/insights/",
+     "/news-insights/insights",
+     "/2026-investment-outlook"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "ares": {
+  "display": "Ares Management",
+  "bu": "Perspectives",
+  "podcasts": [],
+  "web": [
+   {
+    "name": "Ares Perspectives & Outlooks (web)",
+    "url": "https://www.aresmgmt.com/news-views/perspectives",
+    "sitemap_url": "https://www.aresmgmt.com/sitemap.xml",
+    "include": [
+     "/news-views/perspectives"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "Ares Wealth Insights (web)",
+    "url": "https://www.areswms.com/ares-insights",
+    "sitemap_url": "https://www.areswms.com/sitemap.xml",
+    "include": [
+     "/ares-insights"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Wealth Mgmt Solutions"
+   }
+  ]
+ },
+ "carlyle": {
+  "display": "Carlyle",
+  "bu": "Global Insights",
+  "podcasts": [],
+  "todo": [
+   [
+    "Insights & Indicators (host Jason Thomas)",
+    "1607380340"
+   ],
+   [
+    "The Carlyle Podcast",
+    "1490613744"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Carlyle Global Insights & Outlooks (web)",
+    "url": "https://www.carlyle.com/global-insights",
+    "sitemap_url": "https://www.carlyle.com/sitemap.xml",
+    "include": [
+     "/global-insights",
+     "/insights-and-indicators",
+     "/insights-from-the-pms-desk",
+     "/the-carlyle-compass"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "gmo": {
+  "display": "GMO",
+  "bu": "Research",
+  "podcasts": [],
+  "web": [
+   {
+    "name": "GMO Research Library & 7-Year Forecast (web)",
+    "url": "https://www.gmo.com/americas/research-library/",
+    "sitemap_url": "https://www.gmo.com/sitemap.xml",
+    "include": [
+     "/americas/research-library/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "bnpparibas": {
+  "display": "BNP Paribas",
+  "bu": "Asset Management",
+  "podcasts": [
+   [
+    "Talking Heads",
+    "https://feed.ausha.co/ykJO8CqWAZnW",
+    "verified"
+   ],
+   [
+    "Investment Insights",
+    "https://feed.ausha.co/BMAVlT5xZdZ3",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "BNPP AM Insights & Outlook (web)",
+    "url": "https://www.bnpparibas-am.com/en/how-we-think/insights/",
+    "sitemap_url": "https://www.bnpparibas-am.com/sitemap.xml",
+    "include": [
+     "/en/how-we-think/insights/",
+     "/en/portfolio-perspectives/",
+     "/en/forward-thinking/",
+     "/en/investment-outlook-2026/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "socgen": {
+  "display": "Société Générale",
+  "bu": "Cross Asset Research",
+  "podcasts": [
+   [
+    "2050 Investors",
+    "https://feed.ausha.co/yv1Y4t78DAeo",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "SG Cross Asset Research (web)",
+    "url": "https://insight-public.sgmarkets.com/insights",
+    "sitemap_url": "https://insight-public.sgmarkets.com/sitemap.xml",
+    "include": [
+     "/insights",
+     "/videos"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "SG Wholesale Banking News & Insights (web)",
+    "url": "https://wholesale.banking.societegenerale.com/en/news-insights/",
+    "sitemap_url": "https://wholesale.banking.societegenerale.com/sitemap.xml",
+    "include": [
+     "/en/news-insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Wholesale Banking"
+   }
+  ]
+ },
+ "troweprice": {
+  "display": "T. Rowe Price",
+  "bu": "Insights",
+  "podcasts": [],
+  "todo": [
+   [
+    "The Angle from T. Rowe Price",
+    "1729192737"
+   ],
+   [
+    "Confident Conversations on Retirement",
+    "1586816187"
+   ]
+  ],
+  "web": [
+   {
+    "name": "T. Rowe Price Insights & Outlook (web)",
+    "url": "https://www.troweprice.com/personal-investing/resources/insights/index.html",
+    "sitemap_url": "https://www.troweprice.com/sitemap.xml",
+    "include": [
+     "/personal-investing/resources/insights/",
+     "/financial-intermediary/us/en/insights/",
+     "/institutional/us/en/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "capitalgroup": {
+  "display": "Capital Group",
+  "bu": "Insights",
+  "podcasts": [
+   [
+    "Capital Ideas",
+    "https://capitalideas.libsyn.com/rss",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Capital Group Insights & Outlook (web)",
+    "url": "https://www.capitalgroup.com/advisor/insights.html",
+    "sitemap_url": "https://www.capitalgroup.com/institutional/sitemap.xml",
+    "include": [
+     "/advisor/insights/",
+     "/institutional/insights/",
+     "/ria/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": false
+   }
+  ]
+ },
+ "invesco": {
+  "display": "Invesco",
+  "bu": "Market & Economic Insights",
+  "podcasts": [],
+  "todo": [
+   [
+    "Greater Possibilities",
+    "1549028043"
+   ],
+   [
+    "Time in the Market (Invesco UK)",
+    "1699211144"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Invesco Insights & Outlook (web)",
+    "url": "https://www.invesco.com/us/en/insights/topic/all-insights.html",
+    "sitemap_url": "https://www.invesco.com/us/en/sitemap.xml",
+    "include": [
+     "/us/en/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": false
+   }
+  ]
+ },
+ "ssga": {
+  "display": "State Street",
+  "bu": "Global Advisors",
+  "podcasts": [
+   [
+    "Street Signals",
+    "https://omny.fm/shows/street-signals/playlists/podcast.rss",
+    "pattern"
+   ]
+  ],
+  "web": [
+   {
+    "name": "SSGA Insights & Outlooks (web)",
+    "url": "https://www.ssga.com/us/en/institutional/insights",
+    "sitemap_url": "https://www.ssga.com/sitemap.xml",
+    "include": [
+     "/us/en/institutional/insights/",
+     "/us/en/intermediary/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "vanguard": {
+  "display": "Vanguard",
+  "bu": "Investing Insights",
+  "podcasts": [],
+  "todo": [
+   [
+    "Better Vantage by Vanguard",
+    "1834163410"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Vanguard Insights & VEMO (web)",
+    "url": "https://corporate.vanguard.com/content/corporatesite/us/en/corp/articles/",
+    "sitemap_url": "https://corporate.vanguard.com/sitemap.xml",
+    "include": [
+     "/corp/articles/",
+     "/corp/vemo/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "Vanguard Advisor Market Perspectives (web)",
+    "url": "https://advisors.vanguard.com/insights/article/series/market-perspectives",
+    "sitemap_url": "https://advisors.vanguard.com/sitemap.xml",
+    "include": [
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Advisors"
+   }
+  ]
+ },
+ "doubleline": {
+  "display": "DoubleLine",
+  "bu": "Markets & Insights",
+  "podcasts": [
+   [
+    "DoubleLine Minutes",
+    "https://feed.podbean.com/dline-minutes/feed.xml",
+    "pattern"
+   ],
+   [
+    "The Sherman Show",
+    "https://feed.podbean.com/doubleline-the-sherman-show/feed.xml",
+    "pattern"
+   ]
+  ],
+  "web": [
+   {
+    "name": "DoubleLine Market Insights & Outlooks (web)",
+    "url": "https://doubleline.com/markets-insights/",
+    "sitemap_url": "https://doubleline.com/sitemap.xml",
+    "include": [
+     "/markets-insights/",
+     "/funds-insights/",
+     "/category/commentary/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   }
+  ]
+ },
+ "barclays": {
+  "display": "Barclays",
+  "bu": "Investment Bank Research",
+  "podcasts": [
+   [
+    "Barclays Brief",
+    "https://feeds.captivate.fm/barclays-brief/",
+    "verified"
+   ],
+   [
+    "The Flip Side",
+    "https://feeds.captivate.fm/the-flip-side/",
+    "pattern"
+   ]
+  ],
+  "todo": [
+   [
+    "Word on the Street",
+    "1464886078"
+   ],
+   [
+    "Barclays Private Bank Podcasts",
+    "1534752624"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Barclays IB Insights & Outlook (web)",
+    "url": "https://www.ib.barclays/our-insights.html",
+    "sitemap_url": "https://www.ib.barclays/sitemap.xml",
+    "include": [
+     "/our-insights/",
+     "/research/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "Barclays Private Bank Insights (web)",
+    "url": "https://privatebank.barclays.com/insights/",
+    "sitemap_url": "https://privatebank.barclays.com/sitemap.xml",
+    "include": [
+     "/insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Private Bank"
+   }
+  ]
+ },
+ "hsbc": {
+  "display": "HSBC",
+  "bu": "Global Research",
+  "podcasts": [
+   [
+    "The Macro Brief",
+    "https://feeds.acast.com/public/shows/6476e27317ed970011e62580",
+    "verified"
+   ],
+   [
+    "Under the Banyan Tree",
+    "https://feeds.acast.com/public/shows/64db93c01796c400110e0ce3",
+    "verified"
+   ],
+   [
+    "HSBC Global Viewpoint",
+    "https://feeds.acast.com/public/shows/hsbc-global-viewpoint-banking-and-markets",
+    "verified"
+   ]
+  ],
+  "web": [
+   {
+    "name": "HSBC Global Research (web)",
+    "url": "https://www.gbm.hsbc.com/en-gb/campaigns/global-research",
+    "sitemap_url": "https://www.gbm.hsbc.com/sitemap.xml",
+    "include": [
+     "/insights/global-research/",
+     "/en-gb/campaigns/global-research/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true
+   },
+   {
+    "name": "HSBC Private Bank Outlook (web)",
+    "url": "https://www.privatebanking.hsbc.com/media-releases-and-news/",
+    "sitemap_url": "https://www.privatebanking.hsbc.com/sitemap.xml",
+    "include": [
+     "/media-releases-and-news/",
+     "/investment-services/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Private Bank"
+   }
+  ]
+ },
+ "deutschebank": {
+  "display": "Deutsche Bank",
+  "bu": "Research",
+  "podcasts": [
+   [
+    "Podzept",
+    "https://www.dbresearch.com/PROD/RPS_EN-PROD/RSS_PODCAST.calias",
+    "verified"
+   ],
+   [
+    "PERSPECTIVES Weekly",
+    "https://feed.podbean.com/3g9r4-1af4bb/feed.xml",
+    "pattern"
+   ]
+  ],
+  "todo": [
+   [
+    "Behind the Headlines (DB Research)",
+    "unknown"
+   ]
+  ],
+  "web": [
+   {
+    "name": "Deutsche Bank Wealth CIO Insights (web)",
+    "url": "https://wealth.db.com/en/insights/investing-insights.html",
+    "sitemap_url": "https://wealth.db.com/sitemap.xml",
+    "include": [
+     "/en/insights/investing-insights/"
+    ],
+    "exclude": [
+     "/literature/",
+     "/forms/",
+     "/legal/",
+     "/sign-in",
+     "/content/"
+    ],
+    "best_effort": true,
+    "bu": "Wealth CIO"
+   }
+  ]
+ }
+}
