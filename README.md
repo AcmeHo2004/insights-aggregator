@@ -1,14 +1,14 @@
 # Insights Aggregator
 
 A self-updating, NewsNow-style dashboard of investment insights from **JPMorgan,
-Goldman Sachs, and Morgan Stanley** (podcasts + written articles), each with a
-2–3 sentence Claude summary and a "why it matters" line.
+Goldman Sachs, Morgan Stanley, and BlackRock** (podcasts + written articles), each
+with a 2–3 sentence Claude summary and a "why it matters" line.
 
 **Live site:** _(GitHub Pages — see repo Settings → Pages)_
 
 ## How it works
 
-- `firms/{jpm,gs,ms}/` — independent scanners (RSS feeds + public sitemaps →
+- `firms/{jpm,gs,ms,blk}/` — independent scanners (RSS feeds + public sitemaps →
   normalize → dedup → enrich with Claude Sonnet → SQLite). Add a firm by adding a
   folder here.
 - `build_static.py` — exports every firm DB into `site/` (`data.json` + the

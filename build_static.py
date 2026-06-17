@@ -22,6 +22,7 @@ FIRM_META = {
     "JPMorgan":       {"short": "JPM", "color": "#B0894F", "order": 1},
     "Goldman Sachs":  {"short": "GS",  "color": "#6E9BD8", "order": 2},
     "Morgan Stanley": {"short": "MS",  "color": "#3FB8C4", "order": 3},
+    "BlackRock":      {"short": "BLK", "color": "#FF4713", "order": 4},
 }
 DEFAULT = {"short": "", "color": "#8A93A6", "order": 99}
 TOPICS = ["macro", "rates", "equities", "fixed-income", "credit",

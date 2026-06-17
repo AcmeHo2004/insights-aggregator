@@ -30,9 +30,9 @@ jobs:
         run: |
           git fetch origin data --depth=1 2>/dev/null || echo "no data branch yet (first run)"
           if git rev-parse --verify origin/data >/dev/null 2>&1; then
-            git checkout origin/data -- firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db 2>/dev/null || echo "seed DBs missing"
+            git checkout origin/data -- firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db firms/blk/data/insights.db 2>/dev/null || echo "seed DBs missing"
           fi
-          for f in jpm gs ms; do ls -lh firms/$f/data/insights.db 2>/dev/null || echo "firms/$f: fresh (will rebuild)"; done
+          for f in jpm gs ms blk; do ls -lh firms/$f/data/insights.db 2>/dev/null || echo "firms/$f: fresh (will rebuild)"; done
 
       - name: Scan firms (ingest new + enrich with Sonnet)
         env:
@@ -41,6 +41,7 @@ jobs:
           ( cd firms/jpm && python -m jpm_insights scan ) || echo "JPM scan had errors (continuing)"
           ( cd firms/gs  && python -m gs_insights  scan ) || echo "GS scan had errors (continuing)"
           ( cd firms/ms  && python -m ms_insights  scan ) || echo "MS scan had errors (continuing)"
+          ( cd firms/blk && python -m blk_insights scan ) || echo "BLK scan had errors (continuing)"
 
       - name: Build static site
         run: python build_static.py
@@ -62,6 +63,6 @@ jobs:
           git config user.email "insights-bot@users.noreply.github.com"
           git checkout --orphan data-snapshot
           git rm -rf --cached . >/dev/null 2>&1 || true
-          git add -f firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db
+          git add -f firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db firms/blk/data/insights.db
           git commit -m "data snapshot $(date -u +%FT%TZ)" >/dev/null
           git push -f origin data-snapshot:data

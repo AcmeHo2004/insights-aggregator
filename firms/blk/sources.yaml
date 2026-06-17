@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BlackRock Investment Insights — source definitions
+#
+# Parallel sibling project to "JPM Insights", "GS Insights" and "MS Insights"
+# (each firm gets its own folder). Coverage: "The Bid" — BlackRock's flagship
+# investment podcast — and the corporate website's written insights, led by the
+# BlackRock Investment Institute (BII).
+#
+# Ingestion methods (spec §1 priority): the podcast via native RSS (Art19-hosted,
+# same pattern as MS "Thoughts on the Market"); written insights via the public
+# per-region sitemap (www.blackrock.com/us/individual/sitemap.xml — a flat
+# <urlset> with <lastmod>) + og: metadata, through the generic `sitemap_articles`
+# adapter. No headless browser.
+#
+# NOTE — www.blackrock.com sits behind aggressive Akamai bot protection and
+# returned HTTP 403 to every verification fetch from the build/CI sandbox (the
+# same situation as Morgan Stanley's MSIM /im/ section). Per the project rule —
+# only ingest publicly accessible content, never bypass gating — we do NOT try to
+# circumvent it: the adapter sends a normal browser User-Agent and nothing more.
+# The "BII Insights (web)" source below is therefore best-effort: the sitemap and
+# article paths were resolved from public listings, but the source could not be
+# end-to-end verified from this sandbox. Per-source failures are isolated (spec
+# §10), so if Akamai blocks the run it simply yields no items and the podcast is
+# unaffected. The Bid (RSS) is the verified flagship. Revisit the web source once
+# its first live CI run confirms access.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150   # max NEW article pages fetched per web source per run
+
+sources:
+  # ── Podcast (native RSS, Art19-hosted) ────────────────────────────────────
+  - name: The Bid
+    firm: BlackRock
+    business_unit: Markets & Insights
+    method: rss
+    content_type: podcast
+    url: https://rss.art19.com/the-bid
+    tier: 1
+    notes: >-
+      BlackRock's flagship investment podcast (host Oscar Pulido). Markets,
+      mega forces, geopolitics, the macro outlook — features BlackRock Investment
+      Institute strategists and firm leaders. Weekly. Same Art19 host pattern as
+      MS "Thoughts on the Market".
+
+  # ── Corporate website written insights (BlackRock Investment Institute) ───
+  # blackrock.com/us/individual/insights via the US-individual sitemap, filtered
+  # to the BII thought-leadership + insights articles (weekly commentary, market
+  # outlooks, themes). The _filtered_urls hyphen rule drops section/landing roots.
+  - name: BII Insights (web)
+    firm: BlackRock
+    business_unit: BlackRock Investment Institute
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.blackrock.com/us/individual/insights/blackrock-investment-institute
+    tier: 1
+    notes: >-
+      BlackRock Investment Institute + blackrock.com/us/individual/insights
+      articles via the public US-individual sitemap. Best-effort: Akamai bot-gated
+      (see header note); per-source failure is isolated.
+    params:
+      sitemap_url: https://www.blackrock.com/us/individual/sitemap.xml
+      include:
+        - /us/individual/insights/
+      exclude:
+        - /literature/          # PDF literature / fund docs, not articles
+        - /forms/               # gated / interactive forms
+        - /tools/               # interactive tools, not written insights
+        - /sign-in              # auth
+        - /content/             # AEM internals
