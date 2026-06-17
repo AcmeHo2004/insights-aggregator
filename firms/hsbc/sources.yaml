@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# HSBC — investment-insights source definitions
+#
+# Sibling project to the other firms/ scanners. Coverage: the firm's flagship podcast(s) (native RSS) and written insights via the public sitemap (sitemap_articles adapter).
+#
+# Only publicly accessible content; the adapters send a normal browser UA and do
+# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
+# gated/403 source simply yields no items (revisit once a live CI run confirms).
+# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
+#       confirmable during recon); verify/adjust after the first CI run.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  - name: "The Macro Brief"
+    firm: "HSBC"
+    business_unit: "Global Research"
+    method: rss
+    content_type: podcast
+    url: https://feeds.acast.com/public/shows/6476e27317ed970011e62580
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "HSBC Global Viewpoint"
+    firm: "HSBC"
+    business_unit: "Global Research"
+    method: rss
+    content_type: podcast
+    url: https://feeds.acast.com/public/shows/hsbc-global-viewpoint-banking-and-markets
+    tier: 1
+    notes: "feed URL inferred from the host's known slug pattern — confirm on first run."
+
+  - name: "HSBC Insights (web)"
+    firm: "HSBC"
+    business_unit: "Global Research"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.gbm.hsbc.com/en-gb/campaigns/global-research
+    tier: 2
+    notes: "Best-effort. HSBC insights via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://www.gbm.hsbc.com/sitemap.xml
+      include:
+        - /en-gb/campaigns/global-research/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/

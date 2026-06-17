@@ -1,0 +1,37 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Invesco — investment-insights source definitions
+#
+# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+#
+# Only publicly accessible content; the adapters send a normal browser UA and do
+# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
+# gated/403 source simply yields no items (revisit once a live CI run confirms).
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  - name: "Invesco Insights (web)"
+    firm: "Invesco"
+    business_unit: "Market & Economic Insights"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.invesco.com/us/en/insights/topic/all-insights.html
+    tier: 1
+    notes: "Invesco insights via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://www.invesco.com/us/en/sitemap.xml
+      include:
+        - /us/en/insights/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/

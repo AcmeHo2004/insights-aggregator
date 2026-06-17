@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Bank of America — investment-insights source definitions
+#
+# Sibling project to the other firms/ scanners. Coverage: the firm's flagship podcast(s) (native RSS) and written insights via the public sitemap (sitemap_articles adapter).
+#
+# Only publicly accessible content; the adapters send a normal browser UA and do
+# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
+# gated/403 source simply yields no items (revisit once a live CI run confirms).
+# NOTE: Bank of America's site is known to use Akamai/Cloudflare bot protection — the
+#       web source is best-effort and may 403 at runtime; not circumvented.
+# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
+#       confirmable during recon); verify/adjust after the first CI run.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  - name: "Global Research Unlocked"
+    firm: "Bank of America"
+    business_unit: "Global Research"
+    method: rss
+    content_type: podcast
+    url: https://feed.podbean.com/bofaglobalresearch/feed.xml
+    tier: 1
+    notes: "feed URL verified in public listings."
+
+  - name: "Bank of America Insights (web)"
+    firm: "Bank of America"
+    business_unit: "Global Research"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://business.bofa.com/en-us/content/market-strategies-insights.html
+    tier: 2
+    notes: "Best-effort. Bank of America insights via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://business.bofa.com/sitemap.xml
+      include:
+        - /en-us/content/market-strategies-insights.html/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/

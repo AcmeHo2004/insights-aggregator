@@ -1,0 +1,39 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Ares Management — investment-insights source definitions
+#
+# Sibling project to the other firms/ scanners. Coverage: written insights via the public sitemap (sitemap_articles adapter).
+#
+# Only publicly accessible content; the adapters send a normal browser UA and do
+# NOT bypass auth, paywalls or bot-gating. Per-source failures are isolated, so a
+# gated/403 source simply yields no items (revisit once a live CI run confirms).
+# NOTE: sitemap_url below is best-effort (the exact public XML sitemap was not
+#       confirmable during recon); verify/adjust after the first CI run.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  - name: "Ares Management Insights (web)"
+    firm: "Ares Management"
+    business_unit: "Market Insights"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.areswms.com/accessares/private-market-insights
+    tier: 1
+    notes: "Best-effort. Ares Management insights via public sitemap; per-source failure isolated."
+    params:
+      sitemap_url: https://www.areswms.com/sitemap.xml
+      include:
+        - /accessares/private-market-insights/
+      exclude:
+        - /literature/
+        - /forms/
+        - /legal/
+        - /sign-in
+        - /content/
