@@ -1,0 +1,67 @@
+name: Update & deploy
+
+on:
+  schedule:
+    - cron: "0 * * * *"      # hourly (top of the hour, UTC)
+  workflow_dispatch: {}        # allow manual runs
+
+# one run at a time; let an in-progress deploy finish
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: write              # push the built site to `gh-pages` + DBs to `data`
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore previous databases (from the data branch)
+        run: |
+          git fetch origin data --depth=1 2>/dev/null || echo "no data branch yet (first run)"
+          if git rev-parse --verify origin/data >/dev/null 2>&1; then
+            git checkout origin/data -- firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db 2>/dev/null || echo "seed DBs missing"
+          fi
+          for f in jpm gs ms; do ls -lh firms/$f/data/insights.db 2>/dev/null || echo "firms/$f: fresh (will rebuild)"; done
+
+      - name: Scan firms (ingest new + enrich with Sonnet)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ( cd firms/jpm && python -m jpm_insights scan ) || echo "JPM scan had errors (continuing)"
+          ( cd firms/gs  && python -m gs_insights  scan ) || echo "GS scan had errors (continuing)"
+          ( cd firms/ms  && python -m ms_insights  scan ) || echo "MS scan had errors (continuing)"
+
+      - name: Build static site
+        run: python build_static.py
+
+      - name: Deploy to gh-pages
+        run: |
+          cd site
+          git init -q
+          git checkout -b gh-pages
+          git add -A
+          git -c user.name="insights-bot" -c user.email="insights-bot@users.noreply.github.com" commit -q -m "deploy $(date -u +%FT%TZ)"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Persist databases (single-commit data branch)
+        run: |
+          git config user.name "insights-bot"
+          git config user.email "insights-bot@users.noreply.github.com"
+          git checkout --orphan data-snapshot
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          git add -f firms/jpm/data/insights.db firms/gs/data/insights.db firms/ms/data/insights.db
+          git commit -m "data snapshot $(date -u +%FT%TZ)" >/dev/null
+          git push -f origin data-snapshot:data

@@ -17,9 +17,9 @@ settings:
   enrich_window_days: 60
   # Hard cap on LLM-enriched items per feed per run (cost guard).
   max_enrich_per_feed: 8
-  # Model for per-item summaries. Default Sonnet 4.6 (stronger summaries than
-  # Haiku; $3/$15 per 1M tokens vs $1/$5). Supports structured JSON output.
-  llm_model: claude-sonnet-4-6
+  # Model for per-item summaries. Default Haiku 4.5 (cheap + fast for
+  # per-item summaries; $1/$5 per 1M). Supports structured JSON output.
+  llm_model: claude-haiku-4-5
   # Fuzzy-title clustering window for collapsing the same outlook that appears
   # on multiple feeds into one card.
   cluster_window_days: 3

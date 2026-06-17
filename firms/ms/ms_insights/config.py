@@ -18,7 +18,7 @@ DB_PATH = DATA_DIR / "insights.db"
 DEFAULT_SETTINGS = {
     "enrich_window_days": 60,
     "max_enrich_per_feed": 8,
-    "llm_model": "claude-sonnet-4-6",
+    "llm_model": "claude-haiku-4-5",
     "cluster_window_days": 3,
 }
 
