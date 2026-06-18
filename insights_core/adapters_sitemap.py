@@ -14,6 +14,7 @@ robots.txt is respected: each source's `params.exclude` lists disallowed paths.
 from __future__ import annotations
 
 import concurrent.futures as _cf
+import datetime as dt
 import re
 
 import httpx
@@ -125,6 +126,15 @@ def _extract_date(html: str, meta: dict[str, str], lastmod: str | None) -> str |
     m = _JSONLD_DATE.search(html)
     if m and parse_iso(m.group(1)):
         return parse_iso(m.group(1))
+    # Some firms (e.g. BlackRock) expose a real date only as
+    # <meta name="publicationDate" content="Apr 22, 2026">
+    pub = meta.get("publicationdate")
+    if pub:
+        for fmt in ("%b %d, %Y", "%B %d, %Y"):
+            try:
+                return dt.datetime.strptime(pub.strip(), fmt).replace(tzinfo=dt.timezone.utc).isoformat()
+            except ValueError:
+                continue
     return parse_iso(lastmod)
 
 
