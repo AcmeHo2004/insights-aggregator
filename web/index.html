@@ -32,10 +32,10 @@
 
       <div class="group-by" role="tablist" aria-label="Group by">
         <span class="gb-label">Group</span>
+        <button class="seg" data-group="category">Category</button>
         <button class="seg" data-group="firm">Firm</button>
         <button class="seg" data-group="business_unit">Business&nbsp;line</button>
         <button class="seg" data-group="content_type">Type</button>
-        <button class="seg" data-group="none">Stream</button>
       </div>
 
       <div class="spacer"></div>
@@ -49,8 +49,12 @@
       </button>
     </div>
 
+    <div class="topbar-row firmrow">
+      <div class="cat-tabs" id="f-category" role="tablist" aria-label="Firm category"></div>
+      <div class="filt firms" id="f-firm"></div>
+    </div>
+
     <div class="topbar-row filters">
-      <div class="filt" id="f-firm"></div>
       <div class="filt" id="f-type"></div>
       <div class="dropdown" id="f-unit"></div>
       <div class="dropdown" id="f-topic"></div>

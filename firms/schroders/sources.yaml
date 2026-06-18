@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 sources:
   - name: "The Investor Download"
@@ -43,10 +43,10 @@ sources:
     adapter: sitemap_articles
     content_type: article
     url: https://www.schroders.com/en-us/us/individual/insights/
-    tier: 2
-    notes: "Best-effort. Schroders written insights + outlooks via public sitemap; per-source failure isolated."
+    tier: 1
+    notes: "Schroders written insights & outlooks via the US-individual sitemap (~2,700 articles; the global sitemap.xml is a 2-level index the crawler can't fully reach)."
     params:
-      sitemap_url: https://www.schroders.com/sitemap.xml
+      sitemap_url: https://www.schroders.com/en-us/us/individual/sitemap.xml
       include:
         - /insights/
         - /outlook/

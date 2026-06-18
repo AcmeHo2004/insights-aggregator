@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 sources:
   - name: "Talking Heads"
@@ -36,25 +36,11 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "BNPP AM Insights & Outlook (web)"
+  - name: "BNPP AM Viewpoint (web)"
     firm: "BNP Paribas"
     business_unit: "Asset Management"
-    method: scrape
-    adapter: sitemap_articles
+    method: rss
     content_type: article
-    url: https://www.bnpparibas-am.com/en/how-we-think/insights/
-    tier: 2
-    notes: "Best-effort. BNP Paribas written insights + outlooks via public sitemap; per-source failure isolated."
-    params:
-      sitemap_url: https://www.bnpparibas-am.com/sitemap.xml
-      include:
-        - /en/how-we-think/insights/
-        - /en/portfolio-perspectives/
-        - /en/forward-thinking/
-        - /en/investment-outlook-2026/
-      exclude:
-        - /literature/
-        - /forms/
-        - /legal/
-        - /sign-in
-        - /content/
+    url: https://viewpoint.bnpparibas-am.com/feed/
+    tier: 1
+    notes: "BNP Paribas AM 'Viewpoint' written insights + outlooks. WordPress RSS (dated, auto-updates) — the main bnpparibas-am.com sitemap paths returned nothing."

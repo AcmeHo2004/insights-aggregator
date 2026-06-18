@@ -77,6 +77,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .filt .filt-chip[data-dot]::before { content:""; width:8px; height:8px; border-radius:50%;
   background: var(--dot); display:inline-block; }
 
+/* firm row: category tabs + wrapping firm chips */
+.topbar-row.firmrow { align-items:flex-start; padding-top:0; padding-bottom:8px; gap:12px; }
+.cat-tabs { display:flex; align-items:center; gap:2px; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:8px; padding:3px; flex:0 0 auto; }
+.cat-tab { border:0; background:transparent; color:var(--ink-2); padding:5px 11px; border-radius:6px;
+  font-size:12.5px; font-weight:500; white-space:nowrap; cursor:pointer; }
+.cat-tab:hover { color:var(--ink); }
+.cat-tab.active { background:var(--surface); color:var(--ink); box-shadow:var(--shadow);
+  border:1px solid var(--line); padding:4px 10px; }
+.filt.firms { flex:1 1 360px; flex-wrap:wrap; row-gap:6px; gap:6px; }
+
 /* dropdown checklists */
 .dropdown { position:relative; }
 .dd-btn { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);

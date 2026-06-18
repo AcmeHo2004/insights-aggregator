@@ -65,8 +65,8 @@ def _meta(html: str) -> dict[str, str]:
 
 # Sitemap-index recursion caps (many firms publish a <sitemapindex>, not a flat
 # <urlset>; we follow child sitemaps one level deep, bounded for politeness).
-_MAX_CHILD_SITEMAPS = 8
-_MAX_SITEMAP_URLS = 4000
+_MAX_CHILD_SITEMAPS = 15
+_MAX_SITEMAP_URLS = 8000
 
 
 def _fetch_sitemap_text(client, url: str) -> str:
@@ -136,6 +136,7 @@ def _filtered_urls(sitemap: dict[str, str], include: list[str], exclude: list[st
 
 
 def fetch_sitemap_articles(source: Source, settings: dict, known_ids: set[str]) -> CollectResult:
+    import concurrent.futures as _cf
     p = source.params
     sitemap_url = p.get("sitemap_url")
     if not sitemap_url:
@@ -149,18 +150,27 @@ def fetch_sitemap_articles(source: Source, settings: dict, known_ids: set[str]) 
             sitemap = _load_sitemap(client, sitemap_url)
             urls = _filtered_urls(sitemap, include, exclude)
 
-            items: list[Item] = []
+            todo = []
             for url in urls:
                 canonical = canonicalize_url(url)
                 item_id = hash_id(canonical)
                 if item_id in known_ids:
                     continue
-                if len(items) >= max_new:
+                todo.append((url, canonical, item_id))
+                if len(todo) >= max_new:
                     break
-                item = _fetch_article(client, url, canonical, item_id, source, sitemap.get(url))
-                if item:
-                    items.append(item)
-                time.sleep(FETCH_DELAY)
+
+            items: list[Item] = []
+            with _cf.ThreadPoolExecutor(max_workers=12) as ex:
+                futs = [ex.submit(_fetch_article, client, url, canonical, item_id, source, sitemap.get(url))
+                        for (url, canonical, item_id) in todo]
+                for fut in _cf.as_completed(futs):
+                    try:
+                        it = fut.result()
+                    except Exception:  # noqa: BLE001
+                        it = None
+                    if it:
+                        items.append(it)
     except Exception as exc:  # noqa: BLE001
         return CollectResult(source, [], False, str(exc))
 

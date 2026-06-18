@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 sources:
   - name: "Global Research Unlocked"
@@ -27,19 +27,20 @@ sources:
     tier: 1
     notes: "feed URL verified in public listings."
 
-  - name: "BofA Global Research & Market Insights (web)"
+  # BofA Private Bank (the wealth-management division) — written insights & CIO views.
+  - name: "BofA Private Bank Insights (web)"
     firm: "Bank of America"
-    business_unit: "Global Research"
+    business_unit: "Private Bank"
     method: scrape
     adapter: sitemap_articles
     content_type: article
-    url: https://business.bofa.com/en-us/content/market-strategies-insights.html
-    tier: 2
-    notes: "Bot-gated site (not circumvented); best-effort. Best-effort. Bank of America written insights + outlooks via public sitemap; per-source failure isolated."
+    url: https://www.privatebank.bankofamerica.com/articles.html
+    tier: 1
+    notes: "BofA Private Bank (wealth) written insights & CIO market views via public sitemap (~175 articles). BofA Global Research (the IB/research division) is institutional-gated — that division is covered by the 'Global Research Unlocked' podcast above."
     params:
-      sitemap_url: https://business.bofa.com/sitemap.xml
+      sitemap_url: https://www.privatebank.bankofamerica.com/sitemap.xml
       include:
-        - /en-us/content/
+        - /articles/
       exclude:
         - /literature/
         - /forms/

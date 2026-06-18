@@ -45,7 +45,8 @@ jobs:
         run: |
           for d in firms/*/; do
             f=$(basename "$d")
-            ( cd "$d" && python -m "${f}_insights" scan ) || echo "$f scan had errors (continuing)"
+            # 6-min per-firm cap so one slow/hung site can't block the whole job
+            ( cd "$d" && timeout 360 python -m "${f}_insights" scan ) || echo "$f scan failed/timed out (continuing)"
           done
 
       - name: Build static site

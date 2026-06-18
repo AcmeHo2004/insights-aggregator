@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 sources:
   - name: "WellSaid"
@@ -37,10 +37,9 @@ sources:
     tier: 2
     notes: "Best-effort. Wellington written insights + outlooks via public sitemap; per-source failure isolated."
     params:
-      sitemap_url: https://www.wellington.com/sitemap.xml
+      sitemap_url: https://www.wellington.com/en-us/institutional/sitemap.xml
       include:
-        - /en/insights
-        - /en-us/institutional/insights
+        - /insights
       exclude:
         - /literature/
         - /forms/

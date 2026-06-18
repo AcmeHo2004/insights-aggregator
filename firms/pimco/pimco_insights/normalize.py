@@ -120,7 +120,7 @@ def normalize_entry(entry, source: Source) -> Item:
     # Dedup key: feed GUID when present, else canonical URL (spec §3).
     dedup_key = guid or canonical
     # Stable primary key.
-    item_id = hash_id(canonical or guid or (source.name + (entry.get("title") or "")))
+    item_id = hash_id(guid or canonical or (source.name + (entry.get("title") or "")))
 
     return Item(
         id=item_id,

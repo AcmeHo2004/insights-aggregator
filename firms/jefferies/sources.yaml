@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 # Known firm-owned podcasts whose public RSS feed URL was NOT resolvable during
 # recon (only an Apple Podcasts id found). Resolve via the iTunes lookup API
@@ -30,14 +30,13 @@ sources:
     method: scrape
     adapter: sitemap_articles
     content_type: article
-    url: https://insights.jefferies.com/
+    url: https://www.jefferies.com/insights/
     tier: 1
-    notes: "Best-effort. Jefferies written insights + outlooks via public sitemap; per-source failure isolated."
+    notes: "Jefferies written insights & market views (jefferies.com/insights/, ~200+ articles via the WordPress sitemap)."
     params:
-      sitemap_url: https://insights.jefferies.com/sitemap.xml
+      sitemap_url: https://www.jefferies.com/sitemap.xml
       include:
-        - /archive/
-        - /category/
+        - /insights/
       exclude:
         - /literature/
         - /forms/

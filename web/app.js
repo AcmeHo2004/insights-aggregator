@@ -10,9 +10,9 @@ const ls = {
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
 };
 
-const S = { group_by:"firm", sort:"newest", firms:[], units:[], types:[], topics:[], q:"", days:"", unread:false, starred:false };
+const S = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"", unread:false, starred:false };
 let ALL = [], FACETS = null, seenBefore = null, LIMIT = 30;
-const FIRMCOLOR = {}; const DEFAULT_COLOR = "#8A93A6";
+const FIRMCOLOR = {}; const CATLABEL = {}; const DEFAULT_COLOR = "#8A93A6";
 const READ = new Set(ls.get("agg.read", []));
 const STAR = new Set(ls.get("agg.star", []));
 const pins = new Set(ls.get("agg.pins", []));
@@ -23,6 +23,7 @@ const sk = (it) => it.published_at || it.ingested_at || "";
 const isNew = (it) => seenBefore && (it.ingested_at || "") > seenBefore;
 
 function matchItem(it, F) {
+  if (F.category && it.category !== F.category) return false;
   if (F.firms.length && !F.firms.includes(it.firm)) return false;
   if (F.units.length && !F.units.includes(it.business_unit)) return false;
   if (F.types.length && !F.types.includes(it.content_type)) return false;
@@ -34,7 +35,7 @@ function matchItem(it, F) {
   return true;
 }
 function withSince(F) { return { ...F, sinceTs: F.days ? Date.now() - F.days * 864e5 : 0 }; }
-function colKey(it, g) { return g === "firm" ? it.firm : g === "business_unit" ? (it.business_unit || "—") : g === "content_type" ? it.content_type : "all"; }
+function colKey(it, g) { return g === "firm" ? it.firm : g === "category" ? (CATLABEL[it.category] || it.category || "—") : g === "business_unit" ? (it.business_unit || "—") : g === "content_type" ? it.content_type : "all"; }
 
 function computeColumns(group_by, F) {
   const filtered = ALL.filter(it => matchItem(it, F));
@@ -61,6 +62,7 @@ function computeItems(group_by, col, F, offset, limit, sort) {
 /* ── URL <-> state ──────────────────────────────────────────────────────── */
 function syncURL() {
   const p = new URLSearchParams();
+  if (S.category) p.set("category", S.category);
   S.firms.forEach(v => p.append("firm", v)); S.units.forEach(v => p.append("unit", v));
   S.types.forEach(v => p.append("type", v)); S.topics.forEach(v => p.append("topic", v));
   if (S.q) p.set("q", S.q); if (S.days) p.set("since_days", S.days);
@@ -71,6 +73,7 @@ function syncURL() {
 function readURL() {
   const p = new URLSearchParams(location.search);
   S.group_by = p.get("group_by") || "firm"; S.sort = p.get("sort") || "newest";
+  S.category = p.get("category") || "";
   S.firms = p.getAll("firm"); S.units = p.getAll("unit"); S.types = p.getAll("type"); S.topics = p.getAll("topic");
   S.q = p.get("q") || ""; S.days = p.get("since_days") || "";
   S.unread = p.get("unread") === "1"; S.starred = p.get("starred") === "1";
@@ -163,7 +166,10 @@ function initColumn(colEl, c, F) {
 /* ── filters UI ─────────────────────────────────────────────────────────── */
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 function buildFilters() {
-  $("#f-firm").innerHTML = FACETS.firms.map(f => `<button class="filt-chip" data-dot data-v="${esc(f.firm)}" style="--dot:${esc(f.color)}">${esc(f.short || f.firm)}</button>`).join("");
+  const cats = FACETS.categories || [];
+  $("#f-category").innerHTML = `<button class="cat-tab" data-cat="">All firms</button>`
+    + cats.map(c => `<button class="cat-tab" data-cat="${esc(c.key)}">${esc(c.label)}</button>`).join("");
+  $("#f-firm").innerHTML = FACETS.firms.map(f => `<button class="filt-chip" data-dot data-v="${esc(f.firm)}" data-cat="${esc(f.category || "")}" style="--dot:${esc(f.color)}">${esc(f.short || f.firm)}</button>`).join("");
   $("#f-type").innerHTML = FACETS.content_types.map(t => `<button class="filt-chip" data-v="${esc(t)}">${esc(cap(t))}</button>`).join("");
   buildDropdown("#f-unit", "Business line", FACETS.business_units, "units");
   buildDropdown("#f-topic", "Topic", FACETS.topics, "topics");
@@ -180,7 +186,11 @@ function buildDropdown(sel, label, options, key) {
 }
 function closeDropdowns(except) { $$(".dropdown.open").forEach(d => { if (d !== except) d.classList.remove("open"); }); }
 function refreshFilterUI() {
-  $$("#f-firm .filt-chip").forEach(c => c.classList.toggle("active", S.firms.includes(c.dataset.v)));
+  $$("#f-category .cat-tab").forEach(t => t.classList.toggle("active", (t.dataset.cat || "") === S.category));
+  $$("#f-firm .filt-chip").forEach(c => {
+    c.style.display = (!S.category || c.dataset.cat === S.category) ? "" : "none";
+    c.classList.toggle("active", S.firms.includes(c.dataset.v));
+  });
   $$("#f-type .filt-chip").forEach(c => c.classList.toggle("active", S.types.includes(c.dataset.v)));
   syncDropdown("#f-unit", "units"); syncDropdown("#f-topic", "topics");
   $$("#f-date .chip").forEach(c => c.classList.toggle("active", String(c.dataset.days) === String(S.days)));
@@ -188,7 +198,7 @@ function refreshFilterUI() {
   $("#t-star").classList.toggle("active", S.starred);
   $("#q").value = S.q; $("#sort").value = S.sort;
   $$(".group-by .seg").forEach(b => b.classList.toggle("active", b.dataset.group === S.group_by));
-  const active = S.firms.length || S.units.length || S.types.length || S.topics.length || S.q || S.days || S.unread || S.starred;
+  const active = S.category || S.firms.length || S.units.length || S.types.length || S.topics.length || S.q || S.days || S.unread || S.starred;
   $("#reset-btn").classList.toggle("hidden", !active);
 }
 function syncDropdown(sel, key) {
@@ -197,7 +207,7 @@ function syncDropdown(sel, key) {
   $(".dd-btn .lbl", el).textContent = (el.id === "f-unit" ? "Business line" : "Topic") + (n ? ` · ${n}` : "");
   $$(".dd-item", el).forEach(it => it.classList.toggle("on", S[key].includes(it.dataset.v)));
 }
-function resetFilters() { S.firms = []; S.units = []; S.types = []; S.topics = []; S.q = ""; S.days = ""; S.unread = false; S.starred = false; refreshFilterUI(); reload(); }
+function resetFilters() { S.category = ""; S.firms = []; S.units = []; S.types = []; S.topics = []; S.q = ""; S.days = ""; S.unread = false; S.starred = false; refreshFilterUI(); reload(); }
 
 /* ── presets ────────────────────────────────────────────────────────────── */
 function currentState() { const { group_by, sort, firms, units, types, topics, q, days, unread, starred } = S; return { group_by, sort, firms:[...firms], units:[...units], types:[...types], topics:[...topics], q, days, unread, starred }; }
@@ -273,12 +283,17 @@ async function boot() {
   ]);
   FACETS = facets; ALL = data;
   facets.firms.forEach(f => FIRMCOLOR[f.firm] = f.color);
+  (facets.categories || []).forEach(c => CATLABEL[c.key] = c.label);
   if (meta && meta.generated_at) {
     const ago = relTime({ published_at: meta.generated_at });
     $("#freshness").textContent = `${data.length.toLocaleString()} items · updated ${ago} ago`;
   }
   buildFilters();
   $$(".group-by .seg").forEach(b => b.onclick = () => { S.group_by = b.dataset.group; refreshFilterUI(); reload(); });
+  $("#f-category").onclick = (e) => { const t = e.target.closest(".cat-tab"); if (!t) return;
+    S.category = t.dataset.cat || "";
+    if (S.category) S.firms = S.firms.filter(fm => { const ff = FACETS.firms.find(x => x.firm === fm); return ff && ff.category === S.category; });
+    refreshFilterUI(); reload(); };
   $("#f-firm").onclick = (e) => { const c = e.target.closest(".filt-chip"); if (c) { toggleArr(S.firms, c.dataset.v); refreshFilterUI(); reload(); } };
   $("#f-type").onclick = (e) => { const c = e.target.closest(".filt-chip"); if (c) { toggleArr(S.types, c.dataset.v); refreshFilterUI(); reload(); } };
   $("#f-date").onclick = (e) => { const c = e.target.closest(".chip"); if (c) { S.days = c.dataset.days || ""; refreshFilterUI(); reload(); } };

@@ -55,6 +55,54 @@ DEFAULT = {"short": "", "color": "#8A93A6", "order": 99}
 TOPICS = ["macro", "rates", "equities", "fixed-income", "credit",
           "alternatives", "fx", "commodities", "multi-asset", "outlook"]
 
+# Firm category (the top-level tabs). key -> display label, in display order.
+CATEGORIES = [("bank", "Banks"), ("am", "Asset Managers"),
+              ("pe", "Private Equity"), ("hf", "Hedge Funds")]
+FIRM_CATEGORY = {
+    # Banks (bulge-bracket / sell-side; some also have AM/Wealth divisions)
+    "JPMorgan": "bank", "Goldman Sachs": "bank", "Morgan Stanley": "bank",
+    "Bank of America": "bank", "Barclays": "bank", "HSBC": "bank",
+    "Deutsche Bank": "bank", "RBC Capital Markets": "bank", "Citi": "bank",
+    "Nomura": "bank", "Jefferies": "bank", "Société Générale": "bank",
+    "BNP Paribas": "bank",
+    # Asset managers
+    "BlackRock": "am", "PIMCO": "am", "Capital Group": "am",
+    "Franklin Templeton": "am", "State Street": "am", "DoubleLine": "am",
+    "GMO": "am", "Schroders": "am", "abrdn": "am", "Janus Henderson": "am",
+    "Neuberger Berman": "am", "Wellington": "am",
+    # Private equity / alternatives
+    "Apollo": "pe", "KKR": "pe", "Blackstone": "pe", "Oaktree": "pe",
+    "Brookfield": "pe",
+    # Hedge funds (more to come)
+    "AQR": "hf",
+}
+
+# Clean the messy per-source business_unit into 5 standard "business lines".
+_BU_WEALTH = {"Private Bank", "Citi Wealth", "Wealth CIO"}
+_BU_IB = {"CIB", "Wholesale Banking"}
+_BU_INSTITUTE = {"Investment Institute", "FT Institute"}
+_BU_AM = {"Asset Management", "Global Advisors"}
+_BU_RESEARCH = {"Global Research", "Citi Research", "Cross Asset Research",
+                "Investment Bank Research", "Markets & Research", "Research",
+                "Markets & Economy"}
+BUSINESS_LINES = ["Research", "Asset Management", "Wealth Management",
+                  "Investment Bank", "Investment Institute"]
+
+
+def clean_business_unit(category: str, raw: str) -> str:
+    if raw in _BU_INSTITUTE:
+        return "Investment Institute"
+    if raw in _BU_WEALTH:
+        return "Wealth Management"
+    if raw in _BU_IB:
+        return "Investment Bank"
+    if raw in _BU_AM:
+        return "Asset Management"
+    if raw in _BU_RESEARCH:
+        return "Research"
+    # generic "Insights" / "News & Insights" / "Markets & Insights": split by firm type
+    return "Research" if category == "bank" else "Asset Management"
+
 
 def load():
     items, firms = [], {}
@@ -67,13 +115,16 @@ def load():
             continue
         firm = fr[0]
         meta = FIRM_META.get(firm, DEFAULT)
+        category = FIRM_CATEGORY.get(firm, "am")
         firms[firm] = {"firm": firm, "short": meta["short"] or firm[:3].upper(),
-                       "color": meta["color"], "order": meta["order"]}
+                       "color": meta["color"], "order": meta["order"], "category": category}
         for r in conn.execute("SELECT * FROM items"):
             d = dict(r)
             items.append({
                 "id": d["id"], "firm": firm, "firm_short": firms[firm]["short"], "color": meta["color"],
-                "business_unit": d["business_unit"], "source_name": d["source_name"],
+                "category": category,
+                "business_unit": clean_business_unit(category, d["business_unit"] or ""),
+                "source_name": d["source_name"],
                 "content_type": d["content_type"], "title": d["title"],
                 "url": d["url"] or "", "audio_url": d["audio_url"] or "",
                 "published_at": d["published_at"], "ingested_at": d["ingested_at"],
@@ -91,8 +142,11 @@ def load():
 
 def main():
     items, firms = load()
-    units = sorted({it["business_unit"] for it in items if it["business_unit"]})
+    present_units = {it["business_unit"] for it in items if it["business_unit"]}
+    units = [b for b in BUSINESS_LINES if b in present_units]
     types = sorted({it["content_type"] for it in items if it["content_type"]})
+    present_cats = {it["category"] for it in items}
+    categories = [{"key": k, "label": lbl} for k, lbl in CATEGORIES if k in present_cats]
 
     if SITE.exists():
         shutil.rmtree(SITE)
@@ -104,7 +158,8 @@ def main():
     (SITE / "data.json").write_text(
         json.dumps(items, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (SITE / "facets.json").write_text(
-        json.dumps({"firms": firms, "business_units": units, "content_types": types, "topics": TOPICS},
+        json.dumps({"firms": firms, "categories": categories, "business_units": units,
+                    "content_types": types, "topics": TOPICS},
                    ensure_ascii=False), encoding="utf-8")
     (SITE / "meta.json").write_text(
         json.dumps({"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "count": len(items)}),

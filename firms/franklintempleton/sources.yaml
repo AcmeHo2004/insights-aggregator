@@ -15,7 +15,7 @@ settings:
   max_enrich_per_feed: 8
   llm_model: claude-haiku-4-5
   cluster_window_days: 3
-  web_max_new_per_run: 60
+  web_max_new_per_run: 3000
 
 sources:
   - name: "Talking Markets"
@@ -34,13 +34,12 @@ sources:
     adapter: sitemap_articles
     content_type: article
     url: https://www.franklintempleton.com/articles
-    tier: 2
-    notes: "Best-effort. Franklin Templeton written insights + outlooks via public sitemap; per-source failure isolated."
+    tier: 1
+    notes: "Franklin Templeton + boutique-manager (ClearBridge, Royce, Brandywine, Western Asset…) written insights & outlooks via the dynamic-pages sitemap (~1,200 articles)."
     params:
-      sitemap_url: https://www.franklintempleton.com/sitemap.xml
+      sitemap_url: https://www.franklintempleton.com/binaries/content/assets/global/sitemaps/google/en-us_dynamic-pages.xml
       include:
         - /articles/
-        - /insights/
       exclude:
         - /literature/
         - /forms/
