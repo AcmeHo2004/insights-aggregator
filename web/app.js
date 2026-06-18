@@ -12,13 +12,14 @@ const ls = {
 
 const S = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
 let ALL = [], FACETS = null, seenBefore = null, LIMIT = 30;
-const FIRMCOLOR = {}; const FIRMSHORT = {}; const CATLABEL = {}; const DEFAULT_COLOR = "#8A93A6";
+const FIRMCOLOR = {}; const FIRMSHORT = {}; const CATLABEL = {}; const FIRMCAT = {}; const DEFAULT_COLOR = "#8A93A6";
 const READ = new Set(ls.get("agg.read", []));
 const STAR = new Set(ls.get("agg.star", []));
 const pins = new Set(ls.get("agg.pins", []));
 const favs = new Set(ls.get("agg.favs", []));
 let INT = ls.get("agg.interests", null);   // {firms:[], topics:[], onboarded:true}
 let SYNTH = null;                          // cross-firm synthesis (synthesis.json)
+let STANCE = null;                         // firm × asset-class stance grid (stance.json)
 let DRIFT = null;                          // longitudinal stance shifts (drift.json)
 let HEALTH = null;                         // scan health (health.json, lazy-loaded)
 let META = null;                           // meta.json (counts, window, freshness)
@@ -268,22 +269,53 @@ function stanceCell(c) {
   if (net <= -2) return { sym:"▼", cls:"sd", n:c.n };
   return { sym:"●", cls:"sn", n:c.n };
 }
+const stanceSym = (s) => s === "overweight" ? { sym:"▲", cls:"su" }
+  : s === "underweight" ? { sym:"▼", cls:"sd" } : { sym:"●", cls:"sn" };
+function mapMatrix(F) {
+  // Prefer the graded stance.json (Claude or server lexicon); else compute the
+  // client-side lexicon over loaded items. Returns {matrix, llm}.
+  if (STANCE && STANCE.stances && Object.keys(STANCE.stances).length) {
+    const matrix = {};
+    for (const f of Object.keys(STANCE.stances)) {
+      if (F.firms.length && !F.firms.includes(f)) continue;
+      if (F.category && FIRMCAT[f] !== F.category) continue;
+      const row = {};
+      for (const [tp, s] of Object.entries(STANCE.stances[f])) {
+        if (!MAP_TOPICS.includes(tp)) continue;
+        row[tp] = { ...stanceSym(s.stance), n: s.n || 0, note: s.rationale || "" };
+      }
+      if (Object.keys(row).length) matrix[f] = row;
+    }
+    return { matrix, llm: !!STANCE.llm };
+  }
+  const M = computeStance(F), matrix = {};
+  for (const f of Object.keys(M)) {
+    const row = {};
+    for (const tp of MAP_TOPICS) { const c = stanceCell(M[f][tp]); if (c.sym) row[tp] = { sym:c.sym, cls:c.cls, n:c.n, note:"" }; }
+    if (Object.keys(row).length) matrix[f] = row;
+  }
+  return { matrix, llm: false };
+}
 function renderMap(F) {
-  const grid = $("#grid"), M = computeStance(F);
-  const firms = Object.keys(M).map(f => ({ f, n: Object.values(M[f]).reduce((s, c) => s + c.n, 0) }))
-    .filter(x => x.n >= 4).sort((a, b) => b.n - a.n).map(x => x.f);
-  if (!firms.length) { grid.innerHTML = `<div class="empty-col">Not enough dated items to map — try clearing filters.</div>`; return; }
+  const grid = $("#grid"), { matrix, llm } = mapMatrix(F);
+  const firms = Object.keys(matrix)
+    .map(f => ({ f, n: Object.values(matrix[f]).reduce((s, c) => s + (c.n || 0), 0) }))
+    .sort((a, b) => b.n - a.n).map(x => x.f);
+  if (!firms.length) { grid.innerHTML = `<div class="empty-col">Not enough dated notes to map — try clearing filters.</div>`; return; }
   const head = `<th class="mh-firm"></th>` + MAP_TOPICS.map(t => `<th class="mh-top">${esc(cap(t))}</th>`).join("");
   const body = firms.map(f => {
     const cells = MAP_TOPICS.map(tp => {
-      const s = stanceCell(M[f][tp]);
-      return `<td class="mcell ${s.cls}" data-firm="${esc(f)}" data-topic="${esc(tp)}" title="${esc(firmShort(f))} · ${esc(cap(tp))} — ${s.n} item${s.n !== 1 ? "s" : ""}">${s.sym}</td>`;
+      const c = matrix[f][tp];
+      if (!c) return `<td class="mcell sx"></td>`;
+      const tip = c.note ? `${firmShort(f)} · ${cap(tp)} — ${c.note}` : `${firmShort(f)} · ${cap(tp)} — ${c.n} note${c.n !== 1 ? "s" : ""}`;
+      return `<td class="mcell ${c.cls}" data-firm="${esc(f)}" data-topic="${esc(tp)}" title="${esc(tip)}">${c.sym}</td>`;
     }).join("");
     return `<tr><th class="mr-firm" style="--dot:${esc(FIRMCOLOR[f] || DEFAULT_COLOR)}">${esc(firmShort(f))}</th>${cells}</tr>`;
   }).join("");
+  const src = llm ? "graded by Claude" : "tone lexicon";
   grid.innerHTML = `<div class="map-wrap">
     <table class="cmap"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
-    <div class="map-legend"><span class="su">▲</span> add / overweight &nbsp; <span class="sn">●</span> neutral &nbsp; <span class="sd">▼</span> reduce / underweight &nbsp;·&nbsp; tone over the last 120 days · click a cell to read the notes behind it</div>
+    <div class="map-legend"><span class="su">▲</span> overweight &nbsp; <span class="sn">●</span> neutral &nbsp; <span class="sd">▼</span> underweight &nbsp;·&nbsp; last ${(STANCE && STANCE.window_days) || 90} days · ${src} · click a cell to read the notes behind it</div>
   </div>`;
   $$(".mcell", grid).forEach(td => td.onclick = () => {
     if (!td.dataset.topic || td.classList.contains("sx")) return;
@@ -298,7 +330,8 @@ function loadColumns() {
   buildStarSignals();
   const F = withSince(S), grid = $("#grid");
   if (S.group_by === "map") {
-    if (ARCHIVE.count && !ARCHIVE.loaded) { loadArchive(); return; }  // map needs history; loadArchive re-renders
+    // stance.json is precomputed server-side; only the client lexicon fallback needs the archive
+    if (!STANCE && ARCHIVE.count && !ARCHIVE.loaded) { loadArchive(); return; }
     renderMap(F); return;
   }
   const cols = computeColumns(S.group_by, F);
@@ -580,6 +613,7 @@ function currentState() { const { group_by, sort, firms, units, types, topics, q
 const VIEW_BASE = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
 // Built-in starting points a PM actually uses (clean state, not additive).
 const DEFAULT_VIEWS = [
+  { name:"Consensus map",       state:{ group_by:"map" } },
   { name:"This week’s outlooks", state:{ group_by:"firm", topics:["outlook"], days:"7", signal:false } },
   { name:"Rates · Tier 1",       state:{ group_by:"firm", topics:["rates"], days:"30", signal:true } },
   { name:"Credit · Tier 1",      state:{ group_by:"firm", topics:["credit"], days:"30", signal:true } },
@@ -707,22 +741,23 @@ async function boot() {
   // Personalized returning visitors land on For You unless the URL pins a group.
   if (!new URLSearchParams(location.search).has("group_by") && hasInterests()) S.group_by = "foryou";
 
-  let facets, data, meta, synth, drift;
+  let facets, data, meta, synth, drift, stance;
   try {
-    [facets, data, meta, synth, drift] = await Promise.all([
+    [facets, data, meta, synth, drift, stance] = await Promise.all([
       fetch("facets.json").then(r => r.json()),
       fetch("data.json").then(r => r.json()),
       fetch("meta.json").then(r => r.json()).catch(() => null),
       fetch("synthesis.json").then(r => r.json()).catch(() => null),
       fetch("drift.json").then(r => r.json()).catch(() => null),
+      fetch("stance.json").then(r => r.json()).catch(() => null),
     ]);
   } catch {
     $("#grid").innerHTML = `<div class="empty-col">Couldn't load data. Check your connection and refresh.</div>`;
     return;
   }
-  FACETS = facets; ALL = data; SYNTH = synth; DRIFT = drift; META = meta;
+  FACETS = facets; ALL = data; SYNTH = synth; DRIFT = drift; META = meta; STANCE = stance;
   ARCHIVE = { count: (meta && meta.archive_count) || 0, loaded: false };
-  facets.firms.forEach(f => { FIRMCOLOR[f.firm] = f.color; FIRMSHORT[f.firm] = f.short || f.firm; });
+  facets.firms.forEach(f => { FIRMCOLOR[f.firm] = f.color; FIRMSHORT[f.firm] = f.short || f.firm; FIRMCAT[f.firm] = f.category || ""; });
   (facets.categories || []).forEach(c => CATLABEL[c.key] = c.label);
   if (meta && meta.generated_at) {
     const ago = relTime({ published_at: meta.generated_at });

@@ -63,6 +63,15 @@ jobs:
       - name: Stance drift (lexicon)
         run: python drift.py
 
+      # Firm × asset-class stance grid. No key → deterministic lexicon, BUT a recent
+      # Claude grade (from the daily backfill) is fetched first and preserved, so the
+      # hourly run never downgrades it.
+      - name: Consensus stance grid (lexicon; keeps a recent Claude grade)
+        run: |
+          OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d/ -f1); REPO=$(echo "$GITHUB_REPOSITORY" | cut -d/ -f2)
+          curl -fsSL "https://${OWNER}.github.io/${REPO}/stance.json" -o site/stance.json 2>/dev/null || true
+          python stance.py
+
       - name: Deploy to gh-pages
         run: |
           cd site

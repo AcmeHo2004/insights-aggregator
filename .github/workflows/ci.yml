@@ -23,7 +23,7 @@ jobs:
       - run: pip install -r requirements-dev.txt
 
       - name: Compile everything (core + all firm shims + scripts + server)
-        run: python -m py_compile insights_core/*.py firms/*/*_insights/*.py build_static.py synthesize.py drift.py eval_enrich.py server/*.py
+        run: python -m py_compile insights_core/*.py firms/*/*_insights/*.py build_static.py synthesize.py drift.py stance.py eval_enrich.py server/*.py
 
       - name: Smoke tests
         run: python -m pytest tests/ -q
