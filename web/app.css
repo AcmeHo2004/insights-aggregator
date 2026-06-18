@@ -262,3 +262,27 @@ html[data-theme="dark"] .col-badge { color:#1b1208; }
   .search { order:5; flex:1 1 100%; max-width:none; }
 }
 @media (max-width:640px){ .help-hint{ display:none; } :root{ --col-w: 100%; } }
+
+/* ── Consensus map (firm × asset-class heatmap) ──────────────────────────── */
+.map-wrap { padding:8px 16px 40px; overflow-x:auto; }
+.cmap { border-collapse:separate; border-spacing:4px; }
+.cmap th.mh-top { font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--muted); padding:4px 6px; text-align:center; white-space:nowrap; }
+.cmap th.mr-firm { position:sticky; left:0; background:var(--bg); text-align:left; padding:4px 12px 4px 14px;
+  font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; }
+.cmap th.mr-firm::before { content:""; position:absolute; left:4px; top:50%; transform:translateY(-50%);
+  width:6px; height:6px; border-radius:50%; background:var(--dot,#888); }
+.mcell { width:52px; height:34px; text-align:center; font-size:15px; border-radius:7px; cursor:pointer;
+  background:var(--surface-2); color:var(--muted); user-select:none; transition:transform .08s; }
+.mcell:hover { transform:scale(1.12); outline:2px solid var(--line); }
+.mcell.su { background:rgba(34,160,90,.16);  color:#1f9d57; }      /* bullish */
+.mcell.sd { background:rgba(214,69,69,.15);   color:#cf4040; }      /* bearish */
+.mcell.sn { background:var(--surface-2);      color:var(--ink-2); }/* neutral */
+.mcell.sx { background:transparent; cursor:default; }              /* too thin */
+.mcell.sx:hover { transform:none; outline:0; }
+[data-theme="dark"] .mcell.su { background:rgba(34,160,90,.22); color:#43c97f; }
+[data-theme="dark"] .mcell.sd { background:rgba(214,69,69,.22);  color:#f06b6b; }
+.map-legend { margin-top:14px; font-size:12px; color:var(--muted); }
+.map-legend .su { color:#1f9d57; font-weight:700; }
+.map-legend .sd { color:#cf4040; font-weight:700; }
+.map-legend .sn { color:var(--ink-2); font-weight:700; }

@@ -240,10 +240,67 @@ function colHTML(c) {
     <div class="col-list"></div>
   </section>`;
 }
+/* ── Consensus map: firm × asset-class stance (lexicon; prefers stance.json) ── */
+const MAP_TOPICS = ["macro", "rates", "equities", "credit", "fixed-income", "fx", "commodities", "multi-asset"];
+const BULL = /\b(overweight|over-weight|add(?:ing|s)?|bullish|constructive|favou?rs?|favou?red|attractive|opportunit\w*|upside|prefer\w*|tailwind\w*|resilient|outperform\w*|cheap|undervalued)\b/gi;
+const BEAR = /\b(underweight|under-weight|reduc\w*|trim\w*|bearish|caution\w*|defensive|downside|avoid\w*|headwind\w*|expensive|rich|overvalued|vulnerable|underperform\w*|fragile|stretched)\b/gi;
+function computeStance(F) {
+  const since = Date.now() - 120 * 864e5;            // map looks back ~120d (its own window)
+  const M = {};
+  for (const it of ALL) {
+    if (F.category && it.category !== F.category) continue;
+    if (F.firms.length && !F.firms.includes(it.firm)) continue;
+    if (!it.published_at || Date.parse(it.published_at) < since) continue;
+    const txt = `${it.title} ${it.summary} ${it.why_it_matters}`;
+    const b = (txt.match(BULL) || []).length, r = (txt.match(BEAR) || []).length;
+    for (const tp of (it.topics || [])) {
+      if (!MAP_TOPICS.includes(tp)) continue;
+      const m = (M[it.firm] = M[it.firm] || {}), c = (m[tp] = m[tp] || { bull:0, bear:0, n:0 });
+      c.bull += b; c.bear += r; c.n += 1;
+    }
+  }
+  return M;
+}
+function stanceCell(c) {
+  if (!c || c.n < 2) return { sym:"", cls:"sx", n: c ? c.n : 0 };
+  const net = c.bull - c.bear;
+  if (net >= 2) return { sym:"▲", cls:"su", n:c.n };
+  if (net <= -2) return { sym:"▼", cls:"sd", n:c.n };
+  return { sym:"●", cls:"sn", n:c.n };
+}
+function renderMap(F) {
+  const grid = $("#grid"), M = computeStance(F);
+  const firms = Object.keys(M).map(f => ({ f, n: Object.values(M[f]).reduce((s, c) => s + c.n, 0) }))
+    .filter(x => x.n >= 4).sort((a, b) => b.n - a.n).map(x => x.f);
+  if (!firms.length) { grid.innerHTML = `<div class="empty-col">Not enough dated items to map — try clearing filters.</div>`; return; }
+  const head = `<th class="mh-firm"></th>` + MAP_TOPICS.map(t => `<th class="mh-top">${esc(cap(t))}</th>`).join("");
+  const body = firms.map(f => {
+    const cells = MAP_TOPICS.map(tp => {
+      const s = stanceCell(M[f][tp]);
+      return `<td class="mcell ${s.cls}" data-firm="${esc(f)}" data-topic="${esc(tp)}" title="${esc(firmShort(f))} · ${esc(cap(tp))} — ${s.n} item${s.n !== 1 ? "s" : ""}">${s.sym}</td>`;
+    }).join("");
+    return `<tr><th class="mr-firm" style="--dot:${esc(FIRMCOLOR[f] || DEFAULT_COLOR)}">${esc(firmShort(f))}</th>${cells}</tr>`;
+  }).join("");
+  grid.innerHTML = `<div class="map-wrap">
+    <table class="cmap"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+    <div class="map-legend"><span class="su">▲</span> add / overweight &nbsp; <span class="sn">●</span> neutral &nbsp; <span class="sd">▼</span> reduce / underweight &nbsp;·&nbsp; tone over the last 120 days · click a cell to read the notes behind it</div>
+  </div>`;
+  $$(".mcell", grid).forEach(td => td.onclick = () => {
+    if (!td.dataset.topic || td.classList.contains("sx")) return;
+    S.firms = [td.dataset.firm]; S.topics = [td.dataset.topic];
+    S.group_by = "firm"; S.signal = false; S.days = "all";
+    if (ARCHIVE.count && !ARCHIVE.loaded) loadArchive();
+    refreshFilterUI(); reload();
+  });
+}
 function loadColumns() {
   syncURL();
   buildStarSignals();
   const F = withSince(S), grid = $("#grid");
+  if (S.group_by === "map") {
+    if (ARCHIVE.count && !ARCHIVE.loaded) { loadArchive(); return; }  // map needs history; loadArchive re-renders
+    renderMap(F); return;
+  }
   const cols = computeColumns(S.group_by, F);
   if (!cols.length) { grid.innerHTML = `<div class="empty-col">No items match these filters.</div>`; return; }
   grid.innerHTML = cols.map(colHTML).join("");
@@ -310,7 +367,7 @@ function applyFirmSearch() {
 }
 
 function refreshFilterUI() {
-  const GL = { foryou:"For You", theme:"Themes", topic:"Topic", category:"Category", firm:"Firm", business_unit:"Business line", content_type:"Type" };
+  const GL = { foryou:"For You", theme:"Themes", map:"Consensus map", topic:"Topic", category:"Category", firm:"Firm", business_unit:"Business line", content_type:"Type" };
   $("#group-label").textContent = GL[S.group_by] || "Firm";
   $$("#group-menu .menu-item").forEach(b => b.classList.toggle("active", b.dataset.group === S.group_by));
   $("#sort-label").textContent = S.sort === "tier" ? "Priority" : "Newest";
