@@ -1,3 +1,1 @@
-"""Franklin Templeton Investment Insights Aggregator (podcasts + corporate insights site)."""
-
-__version__ = "0.1.0"
+"""Thin firm package — all logic lives in `insights_core`."""

@@ -4,4 +4,6 @@ __pycache__/
 .env
 firms/*/data/
 site/
+server/data/
+eval_report.json
 .DS_Store

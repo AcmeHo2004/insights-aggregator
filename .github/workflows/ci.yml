@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_eval:
+        description: "Also run the LLM enrichment quality judge (needs ANTHROPIC_API_KEY secret)"
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+
+      - name: Compile everything (core + all firm shims + scripts + server)
+        run: python -m py_compile insights_core/*.py firms/*/*_insights/*.py build_static.py synthesize.py drift.py eval_enrich.py server/*.py
+
+      - name: Smoke tests
+        run: python -m pytest tests/ -q
+
+      # Static-only build sanity (no DBs present in CI → 0 items, but must not error).
+      - name: Build sanity
+        run: python build_static.py && python synthesize.py && test -f site/data.json && test -f site/feed.xml
+
+  eval:
+    # Manual only, and only when the box is ticked — the LLM judge costs tokens.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_eval }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Restore DBs (for a real enriched sample)
+        run: |
+          git fetch origin data --depth=1 2>/dev/null || true
+          if git rev-parse --verify origin/data >/dev/null 2>&1; then
+            for d in firms/*/; do git checkout origin/data -- "${d}data/insights.db" 2>/dev/null || true; done
+          fi
+      - name: LLM enrichment quality judge
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python eval_enrich.py --n 40
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval_report.json
+        if: always()

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Insights Aggregator</title>
-  <meta name="description" content="JPMorgan · Goldman Sachs · Morgan Stanley investment insights, aggregated.">
+  <meta name="description" content="Investment insights from banks &amp; asset managers, aggregated — 2–3 sentence summaries with a why-it-matters line.">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -22,67 +22,154 @@
       <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
       <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+      <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/></symbol>
     </defs>
   </svg>
 
   <header class="topbar">
-    <div class="topbar-row">
-      <div class="brand">Insights<span>Aggregator</span></div>
+    <div class="bar">
+      <a class="brand" href="?"><span class="brand-mark">◆</span> Insights</a>
       <span class="freshness" id="freshness"></span>
-
-      <div class="group-by" role="tablist" aria-label="Group by">
-        <span class="gb-label">Group</span>
-        <button class="seg" data-group="category">Category</button>
-        <button class="seg" data-group="firm">Firm</button>
-        <button class="seg" data-group="business_unit">Business&nbsp;line</button>
-        <button class="seg" data-group="content_type">Type</button>
-      </div>
-
-      <div class="spacer"></div>
 
       <label class="search">
         <svg class="ic"><use href="#i-search"/></svg>
-        <input id="q" type="search" placeholder="Search title &amp; summary…" autocomplete="off">
+        <input id="q" type="search" placeholder="Search…" autocomplete="off">
       </label>
+
+      <div class="spacer"></div>
+
+      <!-- Group -->
+      <div class="dropdown" id="dd-group">
+        <button class="bar-btn" id="group-btn" aria-haspopup="true">
+          <span class="bar-btn-k">Group</span><b id="group-label">Firm</b>
+          <svg class="ic sm"><use href="#i-chev"/></svg>
+        </button>
+        <div class="dd-panel dd-menu" id="group-menu">
+          <button class="menu-item" data-group="foryou">✨ For You</button>
+          <button class="menu-item" data-group="theme">◇ Themes</button>
+          <button class="menu-item" data-group="category">Category</button>
+          <button class="menu-item" data-group="firm">Firm</button>
+          <button class="menu-item" data-group="business_unit">Business&nbsp;line</button>
+          <button class="menu-item" data-group="content_type">Type</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="dropdown" id="dd-filters">
+        <button class="bar-btn" id="filters-btn" aria-haspopup="true">
+          <svg class="ic sm"><use href="#i-filter"/></svg> Filters
+          <span class="badge hidden" id="filters-count">0</span>
+          <svg class="ic sm"><use href="#i-chev"/></svg>
+        </button>
+        <div class="dd-panel dd-filters" id="filters-panel">
+          <div class="fp-sec">
+            <div class="fp-label">Category</div>
+            <div class="seg-row" id="fp-category"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-label">Firm <span class="fp-clear" data-clear="firms">clear</span></div>
+            <input class="fp-search" id="fp-firm-search" placeholder="Filter firms…" autocomplete="off">
+            <div class="fp-chips" id="fp-firm"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-label">Business line <span class="fp-clear" data-clear="units">clear</span></div>
+            <div class="fp-chips" id="fp-unit"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-label">Topic <span class="fp-clear" data-clear="topics">clear</span></div>
+            <div class="fp-chips" id="fp-topic"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-label">Type <span class="fp-clear" data-clear="types">clear</span></div>
+            <div class="fp-chips" id="fp-type"></div>
+          </div>
+          <div class="fp-sec">
+            <div class="fp-label">Date</div>
+            <div class="seg-row" id="fp-date">
+              <button class="seg" data-days="">All</button>
+              <button class="seg" data-days="1">Today</button>
+              <button class="seg" data-days="7">7 days</button>
+              <button class="seg" data-days="30">30 days</button>
+            </div>
+          </div>
+          <div class="fp-sec fp-row">
+            <button class="bar-btn toggle" id="fp-unread"><svg class="ic sm"><use href="#i-check"/></svg> Unread only</button>
+          </div>
+          <div class="fp-foot">
+            <button class="fp-clearall" id="fp-clearall">Clear all</button>
+            <button class="fp-done" id="fp-done">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sort -->
+      <div class="dropdown" id="dd-sort">
+        <button class="bar-btn" id="sort-btn" aria-haspopup="true">
+          <span class="bar-btn-k">Sort</span><b id="sort-label">Newest</b>
+          <svg class="ic sm"><use href="#i-chev"/></svg>
+        </button>
+        <div class="dd-panel dd-menu" id="sort-menu">
+          <button class="menu-item" data-sort="newest">Newest</button>
+          <button class="menu-item" data-sort="tier">Priority</button>
+        </div>
+      </div>
+
+      <button class="bar-btn toggle" id="t-star" title="Show starred only">
+        <svg class="ic sm"><use href="#i-star"/></svg> Starred
+      </button>
+
+      <!-- Views (saved presets) -->
+      <div class="dropdown" id="presets"></div>
+
+      <button class="bar-btn" id="export-btn" title="Copy starred as a Markdown digest">
+        <svg class="ic sm"><use href="#i-copy"/></svg> Digest
+      </button>
+      <button class="iconbtn" id="personalize-btn" title="Personalize your For You feed" aria-label="Personalize">
+        <svg class="ic"><use href="#i-spark"/></svg>
+      </button>
       <button class="iconbtn" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">
         <svg class="ic"><use href="#i-sun"/></svg>
       </button>
     </div>
 
-    <div class="topbar-row firmrow">
-      <div class="cat-tabs" id="f-category" role="tablist" aria-label="Firm category"></div>
-      <div class="filt firms" id="f-firm"></div>
-    </div>
-
-    <div class="topbar-row filters">
-      <div class="filt" id="f-type"></div>
-      <div class="dropdown" id="f-unit"></div>
-      <div class="dropdown" id="f-topic"></div>
-      <div class="chips dates" id="f-date">
-        <button class="chip" data-days="">All</button>
-        <button class="chip" data-days="1">Today</button>
-        <button class="chip" data-days="7">7d</button>
-        <button class="chip" data-days="30">30d</button>
-      </div>
-      <button class="chip toggle" id="t-unread">Unread</button>
-      <button class="chip toggle" id="t-star"><svg class="ic sm"><use href="#i-star"/></svg> Starred</button>
-      <button class="chip ghost hidden" id="reset-btn" title="Clear all filters">✕ Clear filters</button>
-      <div class="spacer"></div>
-      <select id="sort" class="select" title="Sort">
-        <option value="newest">Newest</option>
-        <option value="tier">Priority</option>
-      </select>
-      <div class="dropdown" id="presets"></div>
-      <button class="chip ghost" id="export-btn" title="Copy starred as a Markdown digest">
-        <svg class="ic sm"><use href="#i-copy"/></svg> Digest
-      </button>
-    </div>
+    <div class="activebar hidden" id="activebar"></div>
+    <div class="archive-bar hidden" id="archive-bar"></div>
   </header>
+
+  <div class="modal-overlay hidden" id="onb">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="onb-title">
+      <div class="modal-h">
+        <span class="modal-title" id="onb-title"><svg class="ic"><use href="#i-spark"/></svg> Personalize your feed</span>
+        <button class="modal-x" id="onb-x" aria-label="Close">×</button>
+      </div>
+      <p class="modal-sub">Pick the firms and topics you follow — your <b>For You</b> feed ranks by these, plus what you star and how fresh it is. Everything stays in this browser; no account.</p>
+      <div class="modal-sec"><div class="fp-label">Firms</div><div class="fp-chips" id="onb-firms"></div></div>
+      <div class="modal-sec"><div class="fp-label">Topics</div><div class="fp-chips" id="onb-topics"></div></div>
+      <div class="modal-foot">
+        <button class="fp-clearall" id="onb-skip">Skip for now</button>
+        <button class="fp-done" id="onb-save">Show my For You feed</button>
+      </div>
+    </div>
+  </div>
 
   <main id="grid" class="grid" aria-live="polite"></main>
 
+  <div class="modal-overlay hidden" id="health">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="health-title">
+      <div class="modal-h">
+        <span class="modal-title" id="health-title">Scan health</span>
+        <button class="modal-x" id="health-x" aria-label="Close">×</button>
+      </div>
+      <p class="modal-sub" id="health-sub"></p>
+      <div id="health-list"></div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status"></div>
-  <div id="help" class="help-hint">Keys: <b>j</b>/<b>k</b> move · <b>o</b> open · <b>r</b> read · <b>s</b> star · <b>/</b> search</div>
+  <div id="help" class="help-hint">Keys: <b>j</b>/<b>k</b> move · <b>o</b> open · <b>r</b> read · <b>s</b> star · <b>/</b> search
+    · <a href="feed.xml" target="_blank" rel="noopener">RSS</a>
+    · <a href="#" id="status-link">Status</a></div>
 
   <script src="app.js"></script>
 </body>
