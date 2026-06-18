@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Research Affiliates — investment-insights source definitions (Hedge Fund)
+# Rob Arnott's shop: publications, journal papers & insights via public sitemap.
+# (Smart-beta / asset-allocation research — high signal.)
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 150
+
+sources:
+  - name: "Research Affiliates Insights"
+    firm: "Research Affiliates"
+    business_unit: "Research"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.researchaffiliates.com/insights
+    tier: 1
+    notes: "Research Affiliates (Rob Arnott) publications, journal papers & insights via public sitemap."
+    params:
+      sitemap_url: https://www.researchaffiliates.com/sitemap.xml
+      include:
+        - /insights/
+      exclude:
+        - /legal
+        - /disclosures
+        - /terms

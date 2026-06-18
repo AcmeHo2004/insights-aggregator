@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Man Group — investment-insights source definitions (Hedge Fund)
+#
+# Man Group / Man Institute publish a large public research library. English-only
+# insights via the public sitemap (locale-prefixed paths like /it/insights are
+# excluded — the bare /insights path is the English site).
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  enrich_window_days: 60
+  max_enrich_per_feed: 8
+  llm_model: claude-haiku-4-5
+  cluster_window_days: 3
+  web_max_new_per_run: 200
+
+sources:
+  - name: "Man Institute Insights"
+    firm: "Man Group"
+    business_unit: "Research"
+    method: scrape
+    adapter: sitemap_articles
+    content_type: article
+    url: https://www.man.com/insights
+    tier: 1
+    notes: "Man Group / Man Institute research & views via public sitemap (English only — locale paths excluded)."
+    params:
+      sitemap_url: https://www.man.com/sitemap.xml
+      include:
+        - www.man.com/insights        # host-qualified → matches English /insights only, not /it/insights etc.
+      exclude:
+        - /literature/
+        - /legal/
+        - /glossary

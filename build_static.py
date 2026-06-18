@@ -56,6 +56,9 @@ FIRM_META = {
     "Barclays":        {"short": "BARC", "color": "#00AEEF", "order": 38},
     "HSBC":            {"short": "HSBC", "color": "#DB0011", "order": 39},
     "Deutsche Bank":   {"short": "DB", "color": "#0018A8", "order": 40},
+    "Man Group":       {"short": "Man", "color": "#3E4A89", "order": 90},
+    "Verdad":          {"short": "VRD", "color": "#556B7D", "order": 93},
+    "Research Affiliates": {"short": "RAFI", "color": "#B5651D", "order": 94},
 }
 DEFAULT = {"short": "", "color": "#8A93A6", "order": 99}
 TOPICS = ["macro", "rates", "equities", "fixed-income", "credit",
@@ -79,8 +82,8 @@ FIRM_CATEGORY = {
     # Private equity / alternatives
     "Apollo": "pe", "KKR": "pe", "Blackstone": "pe", "Oaktree": "pe",
     "Brookfield": "pe",
-    # Hedge funds (more to come)
-    "AQR": "hf",
+    # Hedge funds (publish public research; secretive multi-strats excluded)
+    "AQR": "hf", "Man Group": "hf", "Verdad": "hf", "Research Affiliates": "hf",
 }
 
 # Clean the messy per-source business_unit into 5 standard "business lines".
