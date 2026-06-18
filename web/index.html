@@ -48,10 +48,9 @@
         <div class="dd-panel dd-menu" id="group-menu">
           <button class="menu-item" data-group="foryou">✨ For You</button>
           <button class="menu-item" data-group="theme">◇ Themes</button>
-          <button class="menu-item" data-group="category">Category</button>
+          <button class="menu-item" data-group="topic">Topic / asset class</button>
           <button class="menu-item" data-group="firm">Firm</button>
-          <button class="menu-item" data-group="business_unit">Business&nbsp;line</button>
-          <button class="menu-item" data-group="content_type">Type</button>
+          <button class="menu-item" data-group="category">Category</button>
         </div>
       </div>
 
@@ -84,15 +83,6 @@
             <div class="fp-label">Type <span class="fp-clear" data-clear="types">clear</span></div>
             <div class="fp-chips" id="fp-type"></div>
           </div>
-          <div class="fp-sec">
-            <div class="fp-label">Date</div>
-            <div class="seg-row" id="fp-date">
-              <button class="seg" data-days="">All</button>
-              <button class="seg" data-days="1">Today</button>
-              <button class="seg" data-days="7">7 days</button>
-              <button class="seg" data-days="30">30 days</button>
-            </div>
-          </div>
           <div class="fp-sec fp-row">
             <button class="bar-btn toggle" id="fp-unread"><svg class="ic sm"><use href="#i-check"/></svg> Unread only</button>
           </div>
@@ -115,6 +105,9 @@
         </div>
       </div>
 
+      <button class="bar-btn toggle" id="t-signal" title="High-signal: flagship strategist / outlook (Tier 1) sources only">
+        <svg class="ic sm"><use href="#i-spark"/></svg> Signal
+      </button>
       <button class="bar-btn toggle" id="t-star" title="Show starred only">
         <svg class="ic sm"><use href="#i-star"/></svg> Starred
       </button>

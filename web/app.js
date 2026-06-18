@@ -10,7 +10,7 @@ const ls = {
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
 };
 
-const S = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"", unread:false, starred:false };
+const S = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
 let ALL = [], FACETS = null, seenBefore = null, LIMIT = 30;
 const FIRMCOLOR = {}; const FIRMSHORT = {}; const CATLABEL = {}; const DEFAULT_COLOR = "#8A93A6";
 const READ = new Set(ls.get("agg.read", []));
@@ -59,18 +59,24 @@ const sk = (it) => it.published_at || it.ingested_at || "";
 const isNew = (it) => seenBefore && (it.ingested_at || "") > seenBefore;
 
 function matchItem(it, F) {
+  if (F.signal && it.tier !== 1) return false;          // high-signal: flagship/strategist (Tier 1) only
   if (F.category && it.category !== F.category) return false;
   if (F.firms.length && !F.firms.includes(it.firm)) return false;
   if (F.units.length && !F.units.includes(it.business_unit)) return false;
   if (F.types.length && !F.types.includes(it.content_type)) return false;
   if (F.topics.length && !F.topics.some(t => it.topics.includes(t))) return false;
   if (F.q) { const q = F.q.toLowerCase(); if (!((it.title || "").toLowerCase().includes(q) || (it.summary || "").toLowerCase().includes(q))) return false; }
-  if (F.sinceTs && !(Date.parse(it.published_at || it.ingested_at || 0) >= F.sinceTs)) return false;
+  if (F.sinceTs) { const t = it.published_at ? Date.parse(it.published_at) : NaN; if (!(t >= F.sinceTs)) return false; }  // undated → only in "All"
   if (F.unread && READ.has(it.id)) return false;
   if (F.starred && !STAR.has(it.id)) return false;
   return true;
 }
-function withSince(F) { return { ...F, sinceTs: F.days ? Date.now() - F.days * 864e5 : 0 }; }
+function withSince(F) {
+  let sinceTs = 0;
+  if (F.days === "ytd") sinceTs = new Date(new Date().getFullYear(), 0, 1).getTime();
+  else if (F.days && F.days !== "all") sinceTs = Date.now() - Number(F.days) * 864e5;
+  return { ...F, sinceTs };
+}
 function colKey(it, g) { return g === "firm" ? it.firm : g === "category" ? (CATLABEL[it.category] || it.category || "—") : g === "business_unit" ? (it.business_unit || "—") : g === "content_type" ? it.content_type : g === "foryou" ? "foryou" : "all"; }
 
 function computeColumns(group_by, F) {
@@ -95,6 +101,18 @@ function computeColumns(group_by, F) {
     for (const it of filtered) for (const tp of (it.topics || [])) counts[tp] = (counts[tp] || 0) + 1;
     return Object.keys(counts).map(tally).sort((a, b) => b.count - a.count);
   }
+  if (group_by === "topic") {
+    const order = ["macro","rates","equities","credit","fixed-income","fx","commodities","multi-asset","alternatives","outlook"];
+    const counts = {};
+    for (const it of filtered) for (const tp of (it.topics || [])) counts[tp] = (counts[tp] || 0) + 1;
+    return Object.keys(counts).sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || counts[b] - counts[a];
+    }).map(tp => {
+      const arr = filtered.filter(it => (it.topics || []).includes(tp));
+      return { key:tp, label:cap(tp), color:DEFAULT_COLOR, count:arr.length, new_count:arr.filter(isNew).length };
+    });
+  }
   if (group_by === "none")
     return [{ key:"all", label:"All insights", color:DEFAULT_COLOR, count:filtered.length, new_count:filtered.filter(isNew).length }];
   const map = new Map();
@@ -114,7 +132,7 @@ function computeItems(group_by, col, F, offset, limit, sort) {
              .map(x => x[1]);
     return arr.slice(offset, offset + limit);
   }
-  if (group_by === "theme") {
+  if (group_by === "theme" || group_by === "topic") {
     arr = arr.filter(it => (it.topics || []).includes(col));
     arr.sort((a, b) => sort === "tier"
       ? ((a.tier - b.tier) || (sk(b) < sk(a) ? -1 : sk(b) > sk(a) ? 1 : 0))
@@ -134,7 +152,8 @@ function syncURL() {
   if (S.category) p.set("category", S.category);
   S.firms.forEach(v => p.append("firm", v)); S.units.forEach(v => p.append("unit", v));
   S.types.forEach(v => p.append("type", v)); S.topics.forEach(v => p.append("topic", v));
-  if (S.q) p.set("q", S.q); if (S.days) p.set("since_days", S.days);
+  if (S.q) p.set("q", S.q); p.set("since_days", S.days);
+  if (!S.signal) p.set("signal", "0");
   if (S.unread) p.set("unread", "1"); if (S.starred) p.set("starred", "1");
   p.set("group_by", S.group_by); if (S.sort !== "newest") p.set("sort", S.sort);
   history.replaceState(null, "", "?" + p.toString());
@@ -144,7 +163,8 @@ function readURL() {
   S.group_by = p.get("group_by") || "firm"; S.sort = p.get("sort") || "newest";
   S.category = p.get("category") || "";
   S.firms = p.getAll("firm"); S.units = p.getAll("unit"); S.types = p.getAll("type"); S.topics = p.getAll("topic");
-  S.q = p.get("q") || ""; S.days = p.get("since_days") || "";
+  S.q = p.get("q") || ""; S.days = p.get("since_days") || "30";
+  S.signal = p.get("signal") !== "0";
   S.unread = p.get("unread") === "1"; S.starred = p.get("starred") === "1";
 }
 
@@ -290,7 +310,7 @@ function applyFirmSearch() {
 }
 
 function refreshFilterUI() {
-  const GL = { foryou:"For You", theme:"Themes", category:"Category", firm:"Firm", business_unit:"Business line", content_type:"Type" };
+  const GL = { foryou:"For You", theme:"Themes", topic:"Topic", category:"Category", firm:"Firm", business_unit:"Business line", content_type:"Type" };
   $("#group-label").textContent = GL[S.group_by] || "Firm";
   $$("#group-menu .menu-item").forEach(b => b.classList.toggle("active", b.dataset.group === S.group_by));
   $("#sort-label").textContent = S.sort === "tier" ? "Priority" : "Newest";
@@ -301,14 +321,15 @@ function refreshFilterUI() {
   $$("#fp-unit .filt-chip").forEach(c => c.classList.toggle("active", S.units.includes(c.dataset.v)));
   $$("#fp-topic .filt-chip").forEach(c => c.classList.toggle("active", S.topics.includes(c.dataset.v)));
   $$("#fp-type .filt-chip").forEach(c => c.classList.toggle("active", S.types.includes(c.dataset.v)));
-  $$("#fp-date .seg").forEach(c => c.classList.toggle("active", String(c.dataset.days) === String(S.days)));
+  $$("#archive-bar .seg").forEach(c => c.classList.toggle("active", String(c.dataset.days) === String(S.days)));
   $("#fp-unread").classList.toggle("active", S.unread);
   applyFirmSearch();
 
   $("#q").value = S.q;
   $("#t-star").classList.toggle("active", S.starred);
+  $("#t-signal").classList.toggle("active", S.signal);
 
-  const n = (S.category ? 1 : 0) + S.firms.length + S.units.length + S.topics.length + S.types.length + (S.days ? 1 : 0) + (S.unread ? 1 : 0);
+  const n = (S.category ? 1 : 0) + S.firms.length + S.units.length + S.topics.length + S.types.length + (S.unread ? 1 : 0);
   const badge = $("#filters-count");
   badge.textContent = n; badge.classList.toggle("hidden", n === 0);
 
@@ -317,7 +338,6 @@ function refreshFilterUI() {
 
 function buildActivebar() {
   const bar = $("#activebar"), chips = [];
-  const DAYS = { "1":"Today", "7":"7 days", "30":"30 days" };
   const add = (rm, v, label) =>
     chips.push(`<span class="afc" data-rm="${rm}"${v !== undefined ? ` data-v="${esc(v)}"` : ""}>${esc(label)}<span class="x">×</span></span>`);
   if (S.category) add("category", undefined, CATLABEL[S.category] || S.category);
@@ -325,7 +345,7 @@ function buildActivebar() {
   S.units.forEach(u => add("unit", u, cap(u)));
   S.topics.forEach(t => add("topic", t, cap(t)));
   S.types.forEach(t => add("type", t, cap(t)));
-  if (S.days) add("days", undefined, DAYS[S.days] || S.days + "d");
+  if (S.signal) add("signal", undefined, "✦ Signal · T1");
   if (S.unread) add("unread", undefined, "Unread");
   if (S.starred) add("starred", undefined, "★ Starred");
   if (S.q) add("q", undefined, `“${S.q}”`);
@@ -404,14 +424,25 @@ function markDirty() {
 }
 
 /* ── archive lazy-load (data.json is recent-only; older loads on demand) ───── */
-function renderArchiveBar() {
-  const bar = $("#archive-bar");
-  if (!ARCHIVE.count || ARCHIVE.loaded) { bar.classList.add("hidden"); bar.innerHTML = ""; return; }
-  const w = (META && META.window_days) || 60;
+function renderDateBar() {
+  const bar = $("#archive-bar"); if (!bar) return;
+  const opts = [["7","7d"], ["30","30d"], ["90","90d"], ["ytd","YTD"], ["all","All"]];
   bar.classList.remove("hidden");
-  bar.innerHTML = `Showing the last ${w} days · ${ALL.length.toLocaleString()} items.
-    <button class="load" id="load-archive">Load full archive (${ARCHIVE.count.toLocaleString()} older)</button>`;
-  $("#load-archive").onclick = loadArchive;
+  bar.innerHTML = `<span class="db-k">Window</span>`
+    + opts.map(([d, l]) => `<button class="seg" data-days="${d}">${l}</button>`).join("")
+    + `<span class="db-note" id="db-note"></span>`;
+  $$("#archive-bar .seg").forEach(b => {
+    b.classList.toggle("active", String(b.dataset.days) === String(S.days));
+    b.onclick = () => setDays(b.dataset.days);
+  });
+}
+function setDays(d) {
+  S.days = d || "all";
+  const w = (META && META.window_days) || 60;
+  const needsArchive = S.days === "all" || S.days === "ytd" || Number(S.days) > w;
+  refreshFilterUI();
+  if (needsArchive && ARCHIVE.count && !ARCHIVE.loaded) loadArchive();   // transparently pull older items
+  else reload();
 }
 async function loadArchive() {
   const btn = $("#load-archive"); if (btn) { btn.disabled = true; btn.textContent = "Loading…"; }
@@ -420,7 +451,6 @@ async function loadArchive() {
   catch { toast("Couldn't load archive"); if (btn) btn.disabled = false; return; }
   ALL = ALL.concat(a);
   ARCHIVE.loaded = true;
-  renderArchiveBar();
   loadColumns();
   toast(`Loaded ${a.length.toLocaleString()} older items`);
   track("load_archive", { n: a.length });
@@ -484,7 +514,7 @@ const closeOnboarding = () => closeModal("#onb");
 function saveInterests(firms, topics) { INT = { firms, topics, onboarded: true }; ls.set("agg.interests", INT); markDirty(); }
 
 /* ── presets (saved views) ──────────────────────────────────────────────── */
-function currentState() { const { group_by, sort, firms, units, types, topics, q, days, unread, starred } = S; return { group_by, sort, firms:[...firms], units:[...units], types:[...types], topics:[...topics], q, days, unread, starred }; }
+function currentState() { const { group_by, sort, firms, units, types, topics, q, days, signal, unread, starred } = S; return { group_by, sort, firms:[...firms], units:[...units], types:[...types], topics:[...topics], q, days, signal, unread, starred }; }
 function buildPresets() {
   const el = $("#presets"), items = ls.get("agg.presets", []);
   el.innerHTML = `<button class="bar-btn"><svg class="ic sm"><use href="#i-bookmark"/></svg>Views</button>
@@ -588,7 +618,9 @@ async function boot() {
     $("#freshness").textContent = `${total.toLocaleString()} items · updated ${ago} ago` + (API ? " · sync ●" : "");
   }
   buildFilters();
-  renderArchiveBar();
+  renderDateBar();
+  { const w = (META && META.window_days) || 60;   // saved/shared window may need older items up front
+    if ((S.days === "all" || S.days === "ytd" || Number(S.days) > w) && ARCHIVE.count) await loadArchive(); }
 
   // group / sort menus (single-select, close on pick)
   $("#group-menu").onclick = (e) => { const b = e.target.closest(".menu-item"); if (!b) return; S.group_by = b.dataset.group; closeDropdowns(null); refreshFilterUI(); reload(); track("group", { group: S.group_by }); };
@@ -621,7 +653,7 @@ async function boot() {
     else if (rm === "unit") toggleArr(S.units, v);
     else if (rm === "topic") toggleArr(S.topics, v);
     else if (rm === "type") toggleArr(S.types, v);
-    else if (rm === "days") S.days = "";
+    else if (rm === "signal") S.signal = false;
     else if (rm === "unread") S.unread = false;
     else if (rm === "starred") S.starred = false;
     else if (rm === "q") S.q = "";
@@ -630,6 +662,7 @@ async function boot() {
 
   // bar actions
   $("#t-star").onclick = () => { S.starred = !S.starred; refreshFilterUI(); reload(); };
+  $("#t-signal").onclick = () => { S.signal = !S.signal; refreshFilterUI(); reload(); track("signal", { on: S.signal }); };
   let qT; $("#q").oninput = (e) => { S.q = e.target.value.trim(); clearTimeout(qT); qT = setTimeout(() => { refreshFilterUI(); reload(); }, 220); };
   $("#theme-btn").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
   $("#export-btn").onclick = exportDigest;

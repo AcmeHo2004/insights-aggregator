@@ -290,10 +290,14 @@ def main():
         if f.is_file():
             shutil.copy(f, SITE / f.name)
 
-    # Split by recency (items are newest-first, so recent is a clean prefix).
+    # "Recent" = items with a REAL publish date inside the window. Undated items
+    # (no published_at — some sitemaps expose no date, e.g. AQR working papers)
+    # can't honestly claim recency, so they go to the archive instead of flooding
+    # the default view with everything stamped "today".
     cutoff = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=RECENT_DAYS)).isoformat()
-    recent = [it for it in items if (it["published_at"] or it["ingested_at"] or "") >= cutoff]
-    archive = items[len(recent):]
+    recent, archive = [], []
+    for it in items:
+        (recent if (it["published_at"] or "") >= cutoff else archive).append(it)
     (SITE / "data.json").write_text(
         json.dumps(recent, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (SITE / "data-archive.json").write_text(
