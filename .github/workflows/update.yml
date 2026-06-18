@@ -52,6 +52,17 @@ jobs:
       - name: Build static site
         run: python build_static.py
 
+      # Hourly synthesis runs WITHOUT the API key on purpose → free deterministic
+      # rollup, refreshed each hour. The daily backfill workflow re-runs it WITH
+      # the key for the richer Claude (Opus) consensus/divergence/shift read.
+      - name: Synthesize cross-firm themes (deterministic)
+        run: python synthesize.py
+
+      # Appends today's stance snapshot to each DB (persisted below) + writes
+      # site/drift.json. No key → lexicon lean; the daily backfill re-runs with Claude.
+      - name: Stance drift (lexicon)
+        run: python drift.py
+
       - name: Deploy to gh-pages
         run: |
           cd site

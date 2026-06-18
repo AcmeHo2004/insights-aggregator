@@ -1,0 +1,102 @@
+name: Backfill enrichment (Batches)
+
+# LLM-enrich the back-catalogue via the Message Batches API (≈50% cheaper than
+# the hourly per-item path). Backfill is async-tolerant (a batch may take up to
+# ~24h), so this is a SEPARATE workflow from the synchronous hourly update — it
+# must never run inside the hourly job's window. Run on demand; or enable the
+# daily cron for steady-state coverage of newly-ingested items.
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Only enrich items published within N days (blank = entire back-catalogue)"
+        required: false
+        default: "120"
+      max_tier:
+        description: "Only enrich items with tier <= N (blank = all tiers)"
+        required: false
+        default: ""
+  # schedule:
+  #   - cron: "30 4 * * *"   # daily 04:30 UTC (uncomment to enable)
+
+concurrency:
+  group: backfill
+  cancel-in-progress: false
+
+permissions:
+  contents: write              # persist enriched DBs back to the `data` branch
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350         # batches usually finish within ~1h; cap well under the 6h job limit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Start from the current DBs so we only enrich still-unenriched items.
+      - name: Restore previous databases (from the data branch)
+        run: |
+          git fetch origin data --depth=1 2>/dev/null || echo "no data branch yet (first run)"
+          if git rev-parse --verify origin/data >/dev/null 2>&1; then
+            for d in firms/*/; do
+              git checkout origin/data -- "${d}data/insights.db" 2>/dev/null || true
+            done
+          fi
+
+      # Firms are auto-discovered from firms/*/ (package name is always <dir>_insights).
+      # The thin __main__ bootstraps insights_core onto sys.path.
+      - name: Backfill firms (Batches API)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          DAYS="${{ github.event.inputs.days }}"
+          TIER="${{ github.event.inputs.max_tier }}"
+          ARGS=""
+          [ -n "$DAYS" ] && ARGS="$ARGS --days $DAYS"
+          [ -n "$TIER" ] && ARGS="$ARGS --max-tier $TIER"
+          for d in firms/*/; do
+            f=$(basename "$d")
+            ( cd "$d" && python -m "${f}_insights" backfill $ARGS ) || echo "$f backfill failed (continuing)"
+          done
+
+      - name: Build static site
+        run: python build_static.py
+
+      - name: Synthesize cross-firm themes (Claude / Opus)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python synthesize.py
+
+      - name: Stance drift (Claude / Opus)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python drift.py
+
+      - name: Deploy to gh-pages
+        run: |
+          cd site
+          git init -q
+          git checkout -b gh-pages
+          git add -A
+          git -c user.name="insights-bot" -c user.email="insights-bot@users.noreply.github.com" commit -q -m "backfill deploy $(date -u +%FT%TZ)"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Persist databases (single-commit data branch)
+        run: |
+          git config user.name "insights-bot"
+          git config user.email "insights-bot@users.noreply.github.com"
+          git checkout --orphan data-snapshot
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          git add -f firms/*/data/insights.db
+          git commit -m "data snapshot (backfill) $(date -u +%FT%TZ)" >/dev/null
+          git push -f origin data-snapshot:data

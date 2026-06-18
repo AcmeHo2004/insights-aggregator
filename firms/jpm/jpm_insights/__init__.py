@@ -1,3 +1,1 @@
-"""JPM Investment Insights Aggregator — Phase 1 (JPMorgan podcast RSS)."""
-
-__version__ = "0.1.0"
+"""Thin firm package — all logic lives in `insights_core`."""

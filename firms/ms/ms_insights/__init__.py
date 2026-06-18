@@ -1,3 +1,1 @@
-"""Morgan Stanley Investment Insights Aggregator (podcasts + morganstanley.com + MSIM)."""
-
-__version__ = "0.1.0"
+"""Thin firm package — all logic lives in `insights_core`."""

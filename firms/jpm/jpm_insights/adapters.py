@@ -1,5 +1,4 @@
-"""Web adapters for written-article sources (spec §1 priority 3 & 4 — but here
-both avoid a headless browser).
+"""JPM-specific web adapters (bespoke — not the generic sitemap adapter).
 
 AM written insights  → `am_solr`: JPMorgan AM exposes a *public, unauthenticated*
   Solr index at `am.jpmorgan.com/cs/search/am/select`. We query US/English
@@ -9,19 +8,21 @@ AM written insights  → `am_solr`: JPMorgan AM exposes a *public, unauthenticat
 CIB / corporate-hub → `jpm_corp_hub`: featured articles are present in the static
   HTML of the hub pages (no JS needed). We extract article links for the two
   high-signal categories and read each page's og: metadata for title/summary.
+
+Shared helpers (Item, CollectResult, normalize utils) come from `insights_core`.
+`ADAPTERS` is merged into the registry by this package's `__main__`.
 """
 
 from __future__ import annotations
 
 import re
 import time
-from dataclasses import dataclass
 
 import httpx
 
-from .config import Source
-from .models import Item
-from .normalize import canonicalize_url, clean_text, hash_id, parse_iso
+from insights_core.types import Source, CollectResult
+from insights_core.models import Item
+from insights_core.normalize import canonicalize_url, clean_text, hash_id, parse_iso
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " \
      "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -33,14 +34,6 @@ TIMEOUT = 30.0
 CIB_SITEMAP_URL = "https://www.jpmorgan.com/US/en/sitemap.xml"
 CIB_FETCH_DELAY = 0.2  # politeness delay between per-article fetches (seconds)
 _sitemap_cache: dict[str, dict[str, str]] = {}  # sitemap url -> {article url: lastmod}
-
-
-@dataclass
-class CollectResult:
-    source: Source
-    items: list[Item]
-    ok: bool
-    error: str = ""
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -127,7 +120,7 @@ def _am_doc_to_item(doc: dict, source: Source) -> Item | None:
     source_name, tier = _am_section(path)
     return Item(
         id=hash_id(canonical),
-        firm="JPMorgan",
+        firm=source.firm,
         business_unit="Asset Management",
         source_name=source_name,
         source_type="api",
@@ -260,7 +253,7 @@ def _fetch_cib_article(client, url, canonical, item_id, source: Source, lastmod=
 
     return Item(
         id=item_id,
-        firm="JPMorgan",
+        firm=source.firm,
         business_unit=source.business_unit,
         source_name=source.name,
         source_type="scrape",
@@ -273,3 +266,10 @@ def _fetch_cib_article(client, url, canonical, item_id, source: Source, lastmod=
         raw_summary=clean_text(meta.get("og:description") or ""),
         tier=source.tier,
     )
+
+
+# Registry merged into core's built-ins by jpm_insights/__main__.py.
+ADAPTERS = {
+    "am_solr": fetch_am_solr,
+    "jpm_corp_hub": fetch_cib_hub,
+}
