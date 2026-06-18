@@ -157,7 +157,7 @@ def fetch_sitemap_articles(source: Source, settings: dict, known_ids: set[str]) 
                     break
 
             items: list[Item] = []
-            with _cf.ThreadPoolExecutor(max_workers=12) as ex:
+            with _cf.ThreadPoolExecutor(max_workers=6) as ex:
                 futs = [ex.submit(_fetch_article, client, url, canonical, item_id, source, sitemap.get(url))
                         for (url, canonical, item_id) in todo]
                 for fut in _cf.as_completed(futs):
@@ -193,6 +193,9 @@ def _fetch_article(client, url, canonical, item_id, source: Source, lastmod=None
     meta = _meta(html)
 
     title = clean_text(meta.get("og:title") or "", 300)
+    if not title:
+        _t = re.search(r"<title[^>]*>([^<]+)</title>", html, re.I)
+        title = clean_text(_t.group(1) if _t else "", 300)
     if not title:
         return None
     title = re.split(r"\s+[|I]\s+Oaktree", title)[0].strip() or title

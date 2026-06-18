@@ -251,6 +251,9 @@ def _fetch_cib_article(client, url, canonical, item_id, source: Source, lastmod=
 
     title = clean_text(meta.get("og:title") or "", 300)
     if not title:
+        _t = re.search(r"<title[^>]*>([^<]+)</title>", html, re.I)
+        title = clean_text(_t.group(1) if _t else "", 300)
+    if not title:
         return None
     # Strip the trailing " | J.P. Morgan ..." house suffix.
     title = re.split(r"\s+[|I]\s+J\.?P\.?\s*Morgan", title)[0].strip() or title
