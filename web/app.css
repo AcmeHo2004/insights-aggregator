@@ -115,6 +115,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fp-done { border:1px solid var(--sel); background:var(--sel); color:#fff; }
 
 /* views (presets) reuse */
+.dd-head { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); padding:4px 8px 2px; }
+.dd-sep { height:1px; background:var(--line-2); margin:5px 0; }
 .dd-item { display:flex; align-items:center; gap:9px; padding:6px 8px; border-radius:6px; font-size:13px; cursor:pointer; }
 .dd-item:hover { background: var(--surface-2); }
 .dd-item .del { margin-left:auto; color:var(--faint); background:none; border:0; }

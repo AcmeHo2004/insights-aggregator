@@ -444,15 +444,20 @@ function setDays(d) {
   if (needsArchive && ARCHIVE.count && !ARCHIVE.loaded) loadArchive();   // transparently pull older items
   else reload();
 }
+let _archiveCache = null, _archivePrefetching = false;
+async function prefetchArchive() {   // warm the back-catalogue on idle so wide windows are instant
+  if (_archiveCache || _archivePrefetching || ARCHIVE.loaded || !ARCHIVE.count) return;
+  _archivePrefetching = true;
+  try { _archiveCache = await fetch("data-archive.json").then(r => r.json()); } catch { /* retry on demand */ }
+  _archivePrefetching = false;
+}
 async function loadArchive() {
-  const btn = $("#load-archive"); if (btn) { btn.disabled = true; btn.textContent = "Loading…"; }
-  let a;
-  try { a = await fetch("data-archive.json").then(r => r.json()); }
-  catch { toast("Couldn't load archive"); if (btn) btn.disabled = false; return; }
+  if (ARCHIVE.loaded) return;
+  let a = _archiveCache;
+  if (!a) { try { a = await fetch("data-archive.json").then(r => r.json()); } catch { toast("Couldn't load archive"); return; } }
   ALL = ALL.concat(a);
   ARCHIVE.loaded = true;
   loadColumns();
-  toast(`Loaded ${a.length.toLocaleString()} older items`);
   track("load_archive", { n: a.length });
 }
 /* Privacy-first, backend-free telemetry: always keeps a capped local event log
@@ -515,26 +520,76 @@ function saveInterests(firms, topics) { INT = { firms, topics, onboarded: true }
 
 /* ── presets (saved views) ──────────────────────────────────────────────── */
 function currentState() { const { group_by, sort, firms, units, types, topics, q, days, signal, unread, starred } = S; return { group_by, sort, firms:[...firms], units:[...units], types:[...types], topics:[...topics], q, days, signal, unread, starred }; }
+const VIEW_BASE = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
+// Built-in starting points a PM actually uses (clean state, not additive).
+const DEFAULT_VIEWS = [
+  { name:"This week’s outlooks", state:{ group_by:"firm", topics:["outlook"], days:"7", signal:false } },
+  { name:"Rates · Tier 1",       state:{ group_by:"firm", topics:["rates"], days:"30", signal:true } },
+  { name:"Credit · Tier 1",      state:{ group_by:"firm", topics:["credit"], days:"30", signal:true } },
+  { name:"Cross-firm themes",    state:{ group_by:"theme", days:"30", signal:false } },
+  { name:"My follows",           state:{ group_by:"foryou" } },
+];
+function applyView(state) {
+  Object.assign(S, VIEW_BASE, state, { firms:[...(state.firms||[])], topics:[...(state.topics||[])], units:[...(state.units||[])], types:[...(state.types||[])] });
+  refreshFilterUI();
+  const w = (META && META.window_days) || 60;
+  if ((S.days === "all" || S.days === "ytd" || Number(S.days) > w) && ARCHIVE.count && !ARCHIVE.loaded) loadArchive();
+  else reload();
+}
 function buildPresets() {
   const el = $("#presets"), items = ls.get("agg.presets", []);
+  const builtin = DEFAULT_VIEWS.map((v, i) => `<div class="dd-item preset" data-b="${i}"><span style="flex:1">${esc(v.name)}</span></div>`).join("");
+  const saved = items.length
+    ? items.map((p, i) => `<div class="dd-item preset" data-i="${i}"><span style="flex:1">${esc(p.name)}</span><button class="del" data-del="${i}" title="Delete">✕</button></div>`).join("")
+    : "";
   el.innerHTML = `<button class="bar-btn"><svg class="ic sm"><use href="#i-bookmark"/></svg>Views</button>
     <div class="dd-panel">
-      ${items.length ? items.map((p, i) => `<div class="dd-item preset" data-i="${i}"><span style="flex:1">${esc(p.name)}</span><button class="del" data-del="${i}" title="Delete">✕</button></div>`).join("") : `<div class="dd-item" style="color:var(--faint);cursor:default">No saved views</div>`}
+      <div class="dd-head">Quick views</div>
+      ${builtin}
+      ${saved ? `<div class="dd-sep"></div><div class="dd-head">Saved</div>${saved}` : ""}
       <div class="dd-actions"><button data-save>＋ Save current view…</button></div></div>`;
   $(".bar-btn", el).onclick = (e) => { e.stopPropagation(); const open = el.classList.contains("open"); closeDropdowns(null); if (!open) el.classList.add("open"); };
-  $$(".preset", el).forEach(p => p.onclick = (e) => { if (e.target.dataset.del !== undefined) return; const s = ls.get("agg.presets", [])[+p.dataset.i]; if (s) { Object.assign(S, s.state); refreshFilterUI(); reload(); el.classList.remove("open"); } });
+  $$(".preset", el).forEach(p => p.onclick = (e) => {
+    if (e.target.dataset.del !== undefined) return;
+    if (p.dataset.b !== undefined) applyView(DEFAULT_VIEWS[+p.dataset.b].state);
+    else { const s = ls.get("agg.presets", [])[+p.dataset.i]; if (s) applyView(s.state); }
+    el.classList.remove("open");
+  });
   $$("[data-del]", el).forEach(b => b.onclick = (e) => { e.stopPropagation(); const a = ls.get("agg.presets", []); a.splice(+b.dataset.del, 1); ls.set("agg.presets", a); buildPresets(); el.classList.add("open"); });
   $("[data-save]", el).onclick = () => { const name = prompt("Name this view:"); if (!name) return; const a = ls.get("agg.presets", []); a.push({ name, state: currentState() }); ls.set("agg.presets", a); buildPresets(); el.classList.remove("open"); toast("View saved"); };
 }
 
 /* ── digest ─────────────────────────────────────────────────────────────── */
-async function exportDigest() {
-  const items = ALL.filter(it => STAR.has(it.id)).sort((a, b) => sk(b) < sk(a) ? -1 : 1);
-  if (!items.length) return toast("No starred items");
+function digestLine(it) {
+  return `- **[${esc0(it.title)}](${it.url || it.audio_url})** — ${it.firm} · ${it.source_name} · ${absTime(it)}`
+    + (it.why_it_matters ? `\n  *Why it matters:* ${it.why_it_matters}` : it.summary ? `\n  ${it.summary}` : "");
+}
+const esc0 = (s) => String(s ?? "").replace(/\]/g, "");   // keep markdown link text clean
+function buildDigest() {
   const today = new Date().toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
-  const md = [`# Insights digest — ${today}`, ""].concat(items.map(it =>
-    `- **[${it.title}](${it.url || it.audio_url})** — ${it.firm} · ${it.source_name} · ${absTime(it)}` + (it.summary ? `\n  ${it.summary}` : ""))).join("\n");
-  try { await navigator.clipboard.writeText(md); toast(`Copied ${items.length} starred items`); }
+  const out = [`# Insights digest — ${today}`, ""];
+  const starred = ALL.filter(it => STAR.has(it.id)).sort((a, b) => sk(b) < sk(a) ? -1 : 1);
+  if (starred.length) { out.push(`## ★ Starred (${starred.length})`, "", ...starred.map(digestLine), ""); }
+  // This week's high-signal: Tier-1, real date in last 7d, ranked by what you follow.
+  const wk = Date.now() - 7 * 864e5;
+  const wantF = (INT && INT.firms) || [], wantT = (INT && INT.topics) || [];
+  const score = (it) => (wantF.includes(it.firm) ? 2 : 0)
+    + (it.topics || []).filter(t => wantT.includes(t)).length * 2 + (it.why_it_matters ? 1 : 0);
+  let hi = ALL.filter(it => it.tier === 1 && it.published_at && Date.parse(it.published_at) >= wk && !STAR.has(it.id));
+  hi.sort((a, b) => score(b) - score(a) || (sk(b) < sk(a) ? -1 : 1));
+  hi = hi.slice(0, 30);
+  if (hi.length) {
+    out.push(`## This week’s high-signal (Tier 1)`, "");
+    const byTopic = {};
+    for (const it of hi) { const tp = (it.topics && it.topics[0]) || "other"; (byTopic[tp] = byTopic[tp] || []).push(it); }
+    for (const tp of Object.keys(byTopic)) out.push(`### ${cap(tp)}`, ...byTopic[tp].map(digestLine), "");
+  }
+  return (starred.length || hi.length) ? out.join("\n") : null;
+}
+async function exportDigest() {
+  const md = buildDigest();
+  if (!md) return toast("Nothing to digest yet — star a few, or check back when Tier-1 items land");
+  try { await navigator.clipboard.writeText(md); toast("Digest copied — paste into email / Slack"); }
   catch { toast("Clipboard blocked — see console"); console.log(md); }
 }
 
@@ -687,6 +742,7 @@ async function boot() {
 
   if (API) await syncPull();   // merge cross-device state + weights (no-op if server down)
   loadColumns();
+  setTimeout(prefetchArchive, 3500);   // warm the archive in the background → instant "All"/wide windows
   if (!INT) openOnboarding();   // first visit
 }
 boot();
