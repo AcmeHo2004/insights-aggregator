@@ -171,14 +171,14 @@ function readURL() {
 
 /* ── time ───────────────────────────────────────────────────────────────── */
 function relTime(it) {
-  const iso = it.published_at || it.ingested_at; if (!iso) return "";
+  const iso = it.published_at; if (!iso) return "";   // publish time only — never the fetch/ingest time
   const d = new Date(iso), diff = (Date.now() - d) / 1000;
   if (diff < 3600) return Math.max(1, Math.floor(diff / 60)) + "m";
   if (diff < 86400) return Math.floor(diff / 3600) + "h";
   if (diff < 6 * 86400) return Math.floor(diff / 86400) + "d";
   return d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
 }
-const absTime = (it) => { const iso = it.published_at || it.ingested_at; return iso ? new Date(iso).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}) : ""; };
+const absTime = (it) => { const iso = it.published_at; return iso ? new Date(iso).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}) : "undated"; };
 
 /* ── render ─────────────────────────────────────────────────────────────── */
 function itemHTML(it) {

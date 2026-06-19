@@ -120,14 +120,24 @@ def _filtered_urls(sitemap: dict[str, str], include: list[str], exclude: list[st
 
 
 def _extract_date(html: str, meta: dict[str, str], lastmod: str | None) -> str | None:
-    for key in ("article:published_time", "article:modified_time", "og:updated_time"):
-        if meta.get(key) and parse_iso(meta[key]):
-            return parse_iso(meta[key])
+    now = dt.datetime.now(dt.timezone.utc)
+
+    def _artifact(iso: str | None) -> bool:
+        # A timestamp within ~2 days of the crawl is almost always a sitemap-regen /
+        # page re-render artifact (e.g. RschAffil stamps lastmod = generation time on
+        # every page, old ones included), NOT a real publish date.
+        try:
+            return (now - dt.datetime.fromisoformat(iso)).total_seconds() < 2 * 86400
+        except Exception:  # noqa: BLE001
+            return False
+
+    # 1) True publish dates — trust unconditionally.
+    if meta.get("article:published_time") and parse_iso(meta["article:published_time"]):
+        return parse_iso(meta["article:published_time"])
     m = _JSONLD_DATE.search(html)
     if m and parse_iso(m.group(1)):
         return parse_iso(m.group(1))
-    # Some firms (e.g. BlackRock) expose a real date only as
-    # <meta name="publicationDate" content="Apr 22, 2026">
+    # BlackRock & similar expose a real date only as <meta name="publicationDate" content="Apr 22, 2026">
     pub = meta.get("publicationdate")
     if pub:
         for fmt in ("%b %d, %Y", "%B %d, %Y"):
@@ -135,7 +145,13 @@ def _extract_date(html: str, meta: dict[str, str], lastmod: str | None) -> str |
                 return dt.datetime.strptime(pub.strip(), fmt).replace(tzinfo=dt.timezone.utc).isoformat()
             except ValueError:
                 continue
-    return parse_iso(lastmod)
+    # 2) Update / lastmod times are publish-date *approximations* — use only if they
+    #    aren't in the crawl window; otherwise the item is undated (never our fetch day).
+    for cand in (meta.get("article:modified_time"), meta.get("og:updated_time"), lastmod):
+        d = parse_iso(cand) if cand else None
+        if d and not _artifact(d):
+            return d
+    return None
 
 
 def _fetch_article(client, url, canonical, item_id, source: Source, lastmod=None) -> Item | None:
