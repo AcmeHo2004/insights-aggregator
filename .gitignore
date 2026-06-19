@@ -7,3 +7,4 @@ site/
 server/data/
 eval_report.json
 .DS_Store
+refresh.log
