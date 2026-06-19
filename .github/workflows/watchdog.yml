@@ -1,0 +1,41 @@
+name: Web freshness watchdog
+
+# Daily check that the residential-IP local refresh (refresh.sh) is keeping the
+# web-scraped sources current. If no new web content has been ingested in
+# STALE_DAYS, this job FAILS — GitHub then emails you (workflow-failure
+# notification) so you know to run ./refresh.sh. Read-only; never writes data.
+
+on:
+  schedule:
+    - cron: "0 12 * * *"   # daily 12:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: watchdog
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore databases (from the data branch)
+        run: |
+          git fetch origin data --depth=1
+          git ls-tree -r --name-only origin/data | grep 'insights.db$' | while read -r p; do
+            git checkout origin/data -- "$p" 2>/dev/null || true
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check web freshness
+        env:
+          STALE_DAYS: "7"
+        run: python freshness_check.py
