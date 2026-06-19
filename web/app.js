@@ -10,7 +10,7 @@ const ls = {
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
 };
 
-const S = { group_by:"firm", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
+const S = { group_by:"topic", sort:"newest", category:"", firms:[], units:[], types:[], topics:[], q:"", days:"30", signal:true, unread:false, starred:false };
 let ALL = [], FACETS = null, seenBefore = null, LIMIT = 30;
 const FIRMCOLOR = {}; const FIRMSHORT = {}; const CATLABEL = {}; const FIRMCAT = {}; const DEFAULT_COLOR = "#8A93A6";
 const READ = new Set(ls.get("agg.read", []));
@@ -161,7 +161,7 @@ function syncURL() {
 }
 function readURL() {
   const p = new URLSearchParams(location.search);
-  S.group_by = p.get("group_by") || "firm"; S.sort = p.get("sort") || "newest";
+  S.group_by = p.get("group_by") || "topic"; S.sort = p.get("sort") || "newest";   // default: cross-firm asset-class columns
   S.category = p.get("category") || "";
   S.firms = p.getAll("firm"); S.units = p.getAll("unit"); S.types = p.getAll("type"); S.topics = p.getAll("topic");
   S.q = p.get("q") || ""; S.days = p.get("since_days") || "30";
@@ -738,8 +738,8 @@ async function boot() {
   seenBefore = ls.get("agg.lastVisit", null);
   ls.set("agg.lastVisit", new Date().toISOString());
   readURL();
-  // Default lands on the multi-column Firm grid (a single For You column looks sparse).
-  // For You stays available in the Group menu / via the personalize button.
+  // Default lands on Topic (cross-firm asset-class columns) — a clean multi-column
+  // first impression. For You stays in the Group menu / behind the ✦ button.
 
   let facets, data, meta, synth, drift, stance;
   try {
