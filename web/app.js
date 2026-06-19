@@ -738,8 +738,8 @@ async function boot() {
   seenBefore = ls.get("agg.lastVisit", null);
   ls.set("agg.lastVisit", new Date().toISOString());
   readURL();
-  // Personalized returning visitors land on For You unless the URL pins a group.
-  if (!new URLSearchParams(location.search).has("group_by") && hasInterests()) S.group_by = "foryou";
+  // Default lands on the multi-column Firm grid (a single For You column looks sparse).
+  // For You stays available in the Group menu / via the personalize button.
 
   let facets, data, meta, synth, drift, stance;
   try {
@@ -835,6 +835,7 @@ async function boot() {
   if (API) await syncPull();   // merge cross-device state + weights (no-op if server down)
   loadColumns();
   setTimeout(prefetchArchive, 3500);   // warm the archive in the background → instant "All"/wide windows
-  if (!INT) openOnboarding();   // first visit
+  // No auto-popping the personalize modal — first impression is the clean Firm grid;
+  // personalization is opt-in via the ✦ button.
 }
 boot();
