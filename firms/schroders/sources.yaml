@@ -18,24 +18,10 @@ settings:
   web_max_new_per_run: 3000
 
 sources:
-  - name: "The Investor Download"
-    firm: "Schroders"
-    business_unit: "Insights"
-    method: rss
-    content_type: podcast
-    url: https://schroders.podbean.com/feed.xml
-    tier: 1
-    notes: "feed URL verified in public listings."
-
-  - name: "The Value Perspective"
-    firm: "Schroders"
-    business_unit: "Insights"
-    method: rss
-    content_type: podcast
-    url: https://schroderstvp.podbean.com/feed.xml
-    tier: 1
-    notes: "feed URL verified in public listings."
-
+  # The two Schroders Podbean podcast feeds ("The Investor Download" and
+  # "The Value Perspective") were removed 2026-06-19 — both return 404 (dead
+  # feeds). Schroders is also hidden from the site (HIDDEN_FIRMS) until it has a
+  # reliably scrapable source; only the web insights source remains below.
   - name: "Schroders Insights & Outlook (web)"
     firm: "Schroders"
     business_unit: "Insights"
