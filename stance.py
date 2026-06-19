@@ -175,10 +175,12 @@ def main() -> None:
             client = None
 
     # Hourly (keyless) runs must NOT downgrade a recent Claude grade to lexicon.
+    # 8-day window so a *weekly* backfill keeps the map Claude-graded (stance is
+    # slow-moving — an 8-day-old grade still beats the lexicon).
     if not client and (SITE / "stance.json").exists():
         try:
             prev = json.loads((SITE / "stance.json").read_text())
-            if prev.get("llm") and _fresh(prev.get("generated_at", ""), 30):
+            if prev.get("llm") and _fresh(prev.get("generated_at", ""), 24 * 8):
                 print("stance.json — kept existing Claude grade (skipped hourly lexicon)")
                 return
         except Exception:  # noqa: BLE001

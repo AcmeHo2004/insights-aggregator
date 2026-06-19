@@ -61,6 +61,10 @@ FIRM_META = {
     "Research Affiliates": {"short": "RAFI", "color": "#B5651D", "order": 94},
 }
 DEFAULT = {"short": "", "color": "#8A93A6", "order": 99}
+# Firms whose DB stays (for a future re-attempt) but are hidden from the site —
+# no scrapable public source. Schroders: podcast feeds 404 + article pages are
+# JS-rendered/Akamai-blocked (no og:title), and we don't run a headless browser.
+HIDDEN_FIRMS = {"Schroders"}
 TOPICS = ["macro", "rates", "equities", "fixed-income", "credit",
           "alternatives", "fx", "commodities", "multi-asset", "outlook"]
 
@@ -157,6 +161,9 @@ def load():
             conn.close()
             continue
         firm = fr[0]
+        if firm in HIDDEN_FIRMS:           # firm has no scrapable public source → keep the DB, hide from the site
+            conn.close()
+            continue
         meta = FIRM_META.get(firm, DEFAULT)
         category = FIRM_CATEGORY.get(firm, "am")
         firms[firm] = {"firm": firm, "short": meta["short"] or firm[:3].upper(),

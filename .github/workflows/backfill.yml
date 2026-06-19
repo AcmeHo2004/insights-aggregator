@@ -17,8 +17,9 @@ on:
         description: "Only enrich items with tier <= N (blank = all tiers)"
         required: false
         default: ""
-  # schedule:
-  #   - cron: "30 4 * * *"   # daily 04:30 UTC (uncomment to enable)
+  schedule:
+    - cron: "30 4 * * 1"   # weekly, Monday 04:30 UTC — refreshes the Claude stance grid + batch-enriches new items
+    #   change to "30 4 * * *" for daily (richer but ~$2/day Opus); remove for manual-only
 
 concurrency:
   group: backfill
